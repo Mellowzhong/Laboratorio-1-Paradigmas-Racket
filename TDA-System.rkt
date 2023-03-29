@@ -1,16 +1,5 @@
 #lang racket
-(require racket/date) ;Se añade el requerimiento para sacar la fecha
-
-;Se añade esta funcion, lo que hace es sacar el año, mes y dia y dejarlos en una lista
-(define fecha-lista
-  (list (date-year (current-date))
-        (date-month (current-date))
-        (date-day (current-date))))
-
-;Esta funcion lo que hace es concatenar los elementos de la lista y hacerlos un string
-(define fecha (string-append (number->string(list-ref fecha-lista 0)) "/"
-                            (number->string(list-ref fecha-lista 1)) "/"
-                            (number->string(list-ref fecha-lista 2))))
+(require "Fecha.rkt") ;Se añade el requerimiento para sacar la fecha
 
 ;Crea un nuevo sistema 
 (define (system new-system . content-system)
