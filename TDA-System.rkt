@@ -22,3 +22,6 @@
     (list fecha
     (list-ref sys 1) 
     (unir (list-ref sys 2) (list unidad nombre capacidad)))))
+
+(define (add-user s-pass  user)
+  (cons user  s-pass))
