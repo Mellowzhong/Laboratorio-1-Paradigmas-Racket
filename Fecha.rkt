@@ -2,15 +2,19 @@
 (provide (all-defined-out))
 (require racket/date)
 
-(define fecha-actual (current-date))
+(define date-now (current-date))
 
-(define fecha-actual-lista
-  (list
-   (date-year fecha-actual)
-   (date-month fecha-actual)
-   (date-day fecha-actual)))
+(define list-date
+    (list
+      (date-year date-now)
+      (date-month date-now)
+      (date-day date-now)
+      )
+  )
   
-(define fecha (string-append (number->string(list-ref fecha-actual-lista 0)) "/"
-                            (number->string(list-ref fecha-actual-lista 1)) "/"
-                            (number->string(list-ref fecha-actual-lista 2))))
+(define fecha (string-append (number->string(list-ref list-date 0)) "/"
+                            (number->string(list-ref list-date 1)) "/"
+                            (number->string(list-ref list-date 2))
+                )
+  )
 
