@@ -9,6 +9,13 @@
     )
 )
 
+;Identifica si es que un elemento esta dentro de una lista de lista
+(define (filter-list element lst)
+  (cond [(null? lst) #f]
+        [(member element (apply append lst)) #t]
+        [else (filter-list element (cdr lst))]
+    )
+)
 ;Uno dos distas simulando el append
 (define (unir list-1 list-2)
     (if (null? list-1);si la primera lista esta vacia retorna el segundo 

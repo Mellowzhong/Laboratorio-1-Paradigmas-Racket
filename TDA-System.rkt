@@ -6,7 +6,7 @@
 (define (system new-system) 
          (list (list "Usuarios:")
                 new-system 
-                (list "Unidades:")
+                (list)
                 fecha
            )
     )
@@ -21,8 +21,15 @@
 (define (add-drive sys unidad nombre capacidad) 
         (list (list-ref sys 0)
         (list-ref sys 1) 
-        (if (filter-element unidad (list-ref sys 2)) (list unidad nombre capacidad)
-         (append (list-ref sys 2) (list unidad nombre capacidad))
+        (if (filter-list unidad (list-ref sys 2)) (list-ref sys 2)
+          (unir (list-ref sys 2) (list unidad nombre capacidad))
             )
         fecha)
     )
+
+;agrega una lista en donde se ubicaran los archivos del drive seleccionado
+(define (switch-drive sys element)
+  (if (filter-list element (list-ref sys 2)) (unir (list-ref sys 2) (list"Folder:" element))
+        sys
+    )
+)
