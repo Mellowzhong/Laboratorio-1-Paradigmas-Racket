@@ -46,7 +46,7 @@
 ;Recorrido: system(list)
 ;Descripción: Crea un directorio en la carpeta seleccionada anteriormente
 (define (md sys element)
-    (unir (remove (last sys) sys) (list (last sys)  element ))
+    (unir (remove (last sys) sys) (append (last sys) (list element )))
     )
 
 (provide (all-defined-out))
