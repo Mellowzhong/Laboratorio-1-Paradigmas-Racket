@@ -1,23 +1,26 @@
 #lang racket
-(provide (all-defined-out))
 (require racket/date)
 
-;Identifica la fecha actual
-(define date-now (current-date))
-
-;Lleva la fecha actual a una lista
+;Dominio: racket/date
+;Recorrido: date (list)
+;Descripción: Ocupa el requerimiento de racket/date para determinar la fecha actual
+;Luego saca el año, mes y dia para ponerlos en una lista
 (define list-date
     (list
-      (date-year date-now)
-      (date-month date-now)
-      (date-day date-now)
+      (date-year (current-date))
+      (date-month (current-date))
+      (date-day (current-date))
       )
   )
 
-;Transforma la lista de la fecha a un string
-(define fecha (string-append (number->string(list-ref list-date 0)) "/"
+;Dominio: list-date
+;Recorrido: date (string)
+;Descripción: Agarra la lista antes obtenida y la convierte en un string
+(define date-now (string-append (number->string(list-ref list-date 0)) "/"
                             (number->string(list-ref list-date 1)) "/"
                             (number->string(list-ref list-date 2))
                 )
   )
+
+(provide (all-defined-out))
 
