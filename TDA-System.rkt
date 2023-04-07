@@ -2,6 +2,15 @@
 (require "Fecha.rkt")
 (require "TDA-User.rkt")
 
+;Dominio:lst(list) - element(string)
+;Recorrido: result(list)
+;Descripción: Agarra la lista entregada y cuando el elemento sea igual al de la lista le agrega una lista 
+;sino simplemente lo agrega a la lista sin la lista 
+(define (add-folder lst element)
+  (cond ((empty? lst) (list element))
+        ((equal? (car lst) element) (append (take lst 3) (list (list (string-append "Folder-" (string element)))) (drop lst 3)))
+        (else (cons (first lst) (add-folder (rest lst) element)))))
+
 ;Dominio: name(string)
 ;Recorrido: system (list)
 ;Descripción: Recibe un nombre y crea un nuevo sistema con ese nombre
@@ -37,13 +46,18 @@
 ;Recorrido: system(list)
 ;Descripción: Crea una lista donde se almacenaran las carpetas de la unidad seleccionada
 (define (switch-drive sys element)
-    (if (filter-element #t (list-ref sys 0));Inspecciona que haya un login 
-        (if (filter-list element (list-ref sys 2)) (unir sys (list (string-append "Folder-" (string element))))
-            sys
+    (if (filter-element #t (list-ref sys 0))
+        (if (filter-element element (list-ref sys 2))
+            (list (list-ref sys 0)
+                (list-ref sys 1)
+                (add-folder (list-ref sys 2) element)
+                date-now
+                )
+                sys
             )
-        sys
-        )
-)
+            sys
+          )
+    )
 
 ;Dominio: sys(list) - element(string)
 ;Recorrido: system(list)
@@ -53,24 +67,6 @@
         (unir (remove (last sys) sys) (append (last sys) (list  element )))
         )
     )
-
-;Dominio: element(string) - lst(list)
-;Recorrido: result(list)
-;Descripción: Agarra la lista entregada y cuando el elemento sea igual al de la lista le agrega una lista vacia
-;sino simplemente lo agrega a la lista sin la lista vacia
-(define (add-folder element lst)
-    (define (tail result lst)
-        (cond[(null? lst) (reverse result)]
-            [(equal? element (car lst))
-                (tail (cons (unir (list(car lst)) (list) ) result) (cdr lst))]
-            [else (tail (cons (car lst) result) (cdr lst))]
-            )
-        )
-    (tail '() lst)
-    )
-
-;#\C/""folder5"/"folder2"/"hola"
-;(md (add-folder ("hola") (add-folder ""folder2") (add-folder "folder5" (add-folder #\C (list-ref sys 2)))))
 
 ;Dominio: sys(list) - element(string)
 ;Recorrido: system(list)
