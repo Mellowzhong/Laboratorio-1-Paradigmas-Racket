@@ -1,4 +1,5 @@
 #lang racket
+(require "Fecha.rkt")
 
 ;Dominio: element (string) - lst (list)
 ;Recorrido: boolean
@@ -10,15 +11,10 @@
     )
 )
 
-;Dominio: element (string) - lst (list)
-;Recorrido: boolean
-;Descripción: Filtra los elementos dentro de una lista de listas
-(define (filter-list element lst)
-  (cond [(null? lst) #f]
-        [(member element (apply append lst)) #t]
-        [else (filter-list element (cdr lst))]
-    )
-)
+(define (add-login lst element)
+  (cond ((null? lst) null)
+        ((equal? (car lst) element) (append (take lst 1) (list #t) (drop lst 1)))
+        (else (cons (first lst) (add-login (rest lst) element)))))
 
 ;Dominio: list-1 (list) - list-2 (list)
 ;Recorrido: list
@@ -42,7 +38,12 @@
 ;Recorrido: system (list)
 ;Descripción: Logea a los usuarios dejandolos con un true
 (define (login sys user) 
-    (if (filter-element user (list-ref sys 0)) (cons (unir (list-ref sys 0) #t) (cdr sys))
+    (if (filter-element user (list-ref sys 0))
+            (list (add-login (list-ref sys 0) user)
+                (list-ref sys 1)
+                (list-ref sys 2)
+                date-now
+                ) 
         (sys)
         )
     )

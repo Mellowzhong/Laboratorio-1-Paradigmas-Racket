@@ -1,0 +1,18 @@
+#lang racket
+(require "TDA-User.rkt")
+(require "TDA-System.rkt")
+
+(define S0 (system "newSystem"))
+(define S1 ((run S0 add-drive) #\C "SO" 1000))
+(define S2 ((run S1 add-drive) #\C "SO1" 3000))
+(define S3 ((run S2 add-drive) #\D "Util" 2000))
+(define S4 ((run S3 add-user) "user1"))
+(define S5 ((run S4 add-user) "user1"))
+(define S6 ((run S5 add-user) "user2"))
+(define S7 ((run S6 login) "user1"))
+(define S8 ((run S7 login) "user2"))
+(define S9 (run S8 logout))
+(define S10 ((run S9 login) "user2"))
+(define S11 ((run S10 switch-drive) #\K))
+(define S12 ((run S11 switch-drive) #\C))
+
