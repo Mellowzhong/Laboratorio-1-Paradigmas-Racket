@@ -71,4 +71,15 @@
     )
 )
 
+(define cd (lambda (sys element)
+    (list (list-ref sys 0)
+        (list-ref sys 1)
+        (cond  [(filter-list element (list-ref sys 2))
+            (add-element element (list-ref sys 2))]
+            [else (list-ref sys 2)]
+            )
+        date-now
+        )
+    )
+)
 (provide (all-defined-out))
