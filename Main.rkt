@@ -1,21 +1,30 @@
 #lang racket
 
-;Dominio: list-1 (list) - list-2 (list)
+;Dominio: element (string) - lst (list)
 ;Recorrido: list
-;Descripción: Une 2 listas 
+;Descripción: Añade el elemento 
 ;Tipo de recursion: Natural
-(define (add-element element lst)
+(define (select-dictory element lst)
   (cond [(null? lst) null]
         [(list? (car lst)) 
-            (append (function (car lst) element)(rest lst))]
-        [else (cons (car lst) (add-element element (cdr lst)))]
+            (append (function-aux (car lst) element)(rest lst))]
+        [else (cons (car lst) (select-dictory element (cdr lst)))]
     )
 )
-(define (function lst element)
-    (cond [(null? lst) null]
-        [(equal? element (car lst)) (append (take lst 0) (list (list #t element)) (drop lst 1))]
-        [else (cons (car lst) (function (cdr lst) element))]
+
+;Dominio: lst (list) - element (string)
+;Recorrido: list
+;Descripción: Hace la parte de agregar el elemento deseado
+;Tipo de recursion: Cola
+(define (function-aux lst element)
+    (define (tail result lst)
+        (cond [(null? lst) (list (reverse result))]
+            [(equal? (car lst) #t) (tail result (append (list #f) (rest lst)))]
+            [(equal? (car lst) element) (tail (cons (list #t element) result) (cdr lst))]
+            [else (tail (cons (car lst) result) (cdr lst))]
+        )
     )
+    (tail null lst)
 )
 ;Dominio: list-1 (list) - list-2 (list)
 ;Recorrido: list
@@ -48,9 +57,9 @@
   (cond [(null? lst) null]
         [(list? (car lst)) 
             (if (equal? (caar lst) #t) 
-                (append (take lst 0) (list (append (car lst)  (list element))) (drop lst 1))
-                (cons (first lst) (add-directory (rest lst) element)))]
-        [else (cons (first lst) (add-directory (rest lst) element))]
+                (append (take lst 0) (list (append (car lst) (list element))) (drop lst 1))
+                (cons (add-directory (car lst) element) (cdr lst)))]
+        [else (cons (car lst) (add-directory (cdr lst) element))]
         )
     )
 ;Dominio: lst (list) - element (string)
@@ -79,13 +88,16 @@
 ;Dominio: element (string) - lst (list)
 ;Recorrido: boolean
 ;Descripción: Filtra los elementos dentro de una lista de listas
-;Tipo de recursion: Natural
-(define (filter-list element lst)
-  (cond [(null? lst) #f]
-        [(and (list? (car lst))
-            (member element (car lst)) #t)]
-        [else (filter-list element (cdr lst))]
+;Tipo de recursion: Cola
+(define (filter-list elem lista)
+    (cond [(null? lista) #f]
+        [(list? (car lista))   
+         (or (filter-list elem (car lista)) 
+            (filter-list elem (cdr lista)))]
+        [(equal? elem (car lista)) #t]  
+        [else (filter-list elem (cdr lista))]
     )
 )
+
 
 (provide (all-defined-out))

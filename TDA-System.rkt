@@ -32,7 +32,7 @@
 (define add-drive (lambda (sys unit-sys name-sys capacity-sys) 
         (list (list-ref sys 0)
         (list-ref sys 1) 
-        (if (filter-element unit-sys (list-ref sys 2)) (list-ref sys 2)
+        (if (filter-list unit-sys (list-ref sys 2)) (list-ref sys 2)
           (append (list-ref sys 2) (list unit-sys name-sys capacity-sys (list #f)))
             )
         date-now)
@@ -64,8 +64,7 @@
         (list-ref sys 1)
         (if (filter-list element (list-ref sys 2))
             (list-ref sys 2)
-            (add-directory (list-ref sys 2) element)
-            )
+            (add-directory (list-ref sys 2) element))
         date-now
         )
     )
@@ -75,7 +74,7 @@
     (list (list-ref sys 0)
         (list-ref sys 1)
         (cond  [(filter-list element (list-ref sys 2))
-            (add-element element (list-ref sys 2))]
+            (select-dictory element (list-ref sys 2))]
             [else (list-ref sys 2)]
             )
         date-now
