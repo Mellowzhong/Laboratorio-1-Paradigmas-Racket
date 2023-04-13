@@ -33,7 +33,7 @@
         (list (list-ref sys 0)
         (list-ref sys 1) 
         (if (filter-list unit-sys (list-ref sys 2)) (list-ref sys 2)
-          (append (list-ref sys 2) (list unit-sys name-sys capacity-sys (list #f)))
+          (unir (list-ref sys 2) (list unit-sys name-sys capacity-sys))
             )
         date-now)
     )
@@ -45,7 +45,7 @@
 ;Tipo de recursion: No empleada
 (define switch-drive (lambda (sys element)
     (if (filter-element #t (list-ref sys 0))
-        (if (filter-element element (list-ref sys 2))
+        (if (filter-list element (list-ref sys 2))
             (list (list-ref sys 0)
                 (list-ref sys 1)
                 (add-folder (list-ref sys 2) element)
@@ -81,4 +81,5 @@
         )
     )
 )
+
 (provide (all-defined-out))
