@@ -1,6 +1,7 @@
 #lang racket
 (require "Fecha.rkt")
 
+;-----------------------Constructor-----------------------
 ;Dominio: name(string)
 ;Recorrido: system (list)
 ;Descripción: Recibe un nombre y crea un nuevo sistema con ese nombre
@@ -13,17 +14,8 @@
            )
     )
 )
-
-;Dominio: sys(list) - function(string)
-;Recorrido: function(string) - sys (list)
-;Descripción: Recibe el sistema y la funcion a efectuar
-;efectua la funcion pasando el sistema como uno de sus parametros
-;Tipo de recursion: No empleada
-(define run (lambda (sys funcion) 
-    (curry funcion sys)
-    )
-)
-
+;--------------------------------------------------------
+;-----------------------Modificadores-----------------------
 ;Dominio:  sys(list) - unit-sys(string) - name-sys(string) - capacity-sys(string)
 ;Recorrido: system (list)
 ;Descripción: Añade una particion al sistema
@@ -69,18 +61,14 @@
     )
 )
 
-
-;Dominio: element (string) - lst (list)
-;Recorrido: boolean
-;Descripción: Filtra los elementos dentro de una lista de listas
-;Tipo de recursion: Cola
-(define (filter-list elem lista)
-    (cond [(null? lista) #f]
-        [(list? (car lista))   
-         (or (filter-list elem (car lista)) 
-            (filter-list elem (cdr lista)))]
-        [(equal? elem (car lista)) #t]  
-        [else (filter-list elem (cdr lista))]
+(define (add-element lst element)
+    (cons element (last lst))
+)
+;--------------------------------------------------------
+;-----------------------Pertenencia-----------------------
+(define (Comprobation lst)
+    (if (equal? (last lst) "select") #t
+        #f
     )
 )
 ;Dominio: element (string) - lst (list)
@@ -93,15 +81,20 @@
         [else (filter-element element (cdr lst))]
     )
 )
-
-
-(define (Comprobation lst)
-    (if (equal? (last lst) "select") #t
-        #f
+;--------------------------------------------------------
+;-----------------------Otras operaciones-----------------------
+;Dominio: element (string) - lst (list)
+;Recorrido: boolean
+;Descripción: Filtra los elementos dentro de una lista de listas
+;Tipo de recursion: Cola
+(define (filter-list elem lista)
+    (cond [(null? lista) #f]
+        [(list? (car lista))   
+         (or (filter-list elem (car lista)) 
+            (filter-list elem (cdr lista)))]
+        [(equal? elem (car lista)) #t]  
+        [else (filter-list elem (cdr lista))]
     )
-)
-(define (add-element lst element)
-    (cons element (last lst))
 )
 
 ;Dominio: lst (list) - element (string)
@@ -119,9 +112,6 @@
         )
     )
 
-(define (getUnit lst)
-    (car lst)
-)
 ;Dominio:lst (list) - element (string)
 ;Recorrido: System (list)
 ;Descripción: Agarra la lista entregada y cuando el elemento sea igual al de la lista le agrega una lista 
@@ -129,7 +119,7 @@
 ;Tipo de recursion: Natural
 (define (add-folder lst element)
   (cond [(null? lst) null]
-        [(equal? (getUnit (car lst)) element) 
+        [(equal? (car (car lst)) element) 
             (append 
                 (list (reverse (cons (list "select") (reverse (car lst)))))
                 (rest lst))]
@@ -146,5 +136,13 @@
         (list list-2)
         (cons (car list-1) (unir (cdr list-1) list-2)));si la primera lista no es vacia, se hace car y cdrs para concatenar por partes
     )
-    
+;Dominio: sys(list) - function(string)
+;Recorrido: function(string) - sys (list)
+;Descripción: Recibe el sistema y la funcion a efectuar
+;efectua la funcion pasando el sistema como uno de sus parametros
+;Tipo de recursion: No empleada
+(define run (lambda (sys funcion) 
+    (curry funcion sys)
+    )
+)
 (provide (all-defined-out))

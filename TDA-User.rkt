@@ -2,6 +2,7 @@
 (require "Fecha.rkt")
 (require "TDA-System.rkt")
 
+;-----------------------Modificadores-----------------------
 ;Dominio: sys (list) - user (string)
 ;Recorrido: system (list)
 ;Descripción: Añade un usuario al sistema
@@ -40,6 +41,7 @@
     (cons (filter string? (list-ref sys 0)) (cdr sys))
     )
 )
+;-----------------------Otras operaciones-----------------------
 ;Dominio: lst (list) - element (string)
 ;Recorrido: System (list)
 ;Descripcion: Si el element es igual al primer elemento de la lista le agrega un true
