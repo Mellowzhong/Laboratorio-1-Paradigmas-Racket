@@ -1,0 +1,10 @@
+Autoevaluacion   Puntaje
+    TDA             1
+    Constructor     1
+    run             1
+    add-drive       1
+    register        1
+    login           1
+    logout          1
+    switch-drive    0.5
+    md              0.75

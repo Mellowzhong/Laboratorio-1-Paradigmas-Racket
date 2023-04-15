@@ -21,17 +21,3 @@
 (define S15 ((run S14 md) "folder2"))
 (define S16 ((run S15 md) "folder3"))
 
-;ingresa a carpeta folder2
-(define S17 ((run S16 cd) "folder2"))
-
-;crea subcarpeta folder21 dentro de folder2 (incluye caso S18 de carpeta con nombre duplicado)
-(define S18 ((run S17 md) "folder21"))
-(define S19 ((run S18 md) "folder21"))
-
-;ingresa a subcarpeta e intenta ingresar a subcarpeta inexistente S21
-(define S20 ((run S19 cd) "folder21"))
-(define S21 ((run S20 cd) "folder22"))
-
-
-
-

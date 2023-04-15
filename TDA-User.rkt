@@ -1,7 +1,11 @@
 #lang racket
 (require "Fecha.rkt")
-(require "Main.rkt")
+(require "TDA-System.rkt")
 
+;Dominio: sys (list) - user (string)
+;Recorrido: system (list)
+;Descripción: Añade un usuario al sistema
+;Tipo de recursion: No empleada
 ;Dominio: sys (list) - user (string)
 ;Recorrido: system (list)
 ;Descripción: Añade un usuario al sistema
@@ -36,5 +40,16 @@
     (cons (filter string? (list-ref sys 0)) (cdr sys))
     )
 )
+;Dominio: lst (list) - element (string)
+;Recorrido: System (list)
+;Descripcion: Si el element es igual al primer elemento de la lista le agrega un true
+;Sino sigue recorriendo la lista
+;Tipo de recursion: Natural
+(define (add-login lst element)
+  (cond [(null? lst) null]
+        [(equal? (car lst) element) (append (take lst 1) (list #t) (drop lst 1))]
+        [else (cons (first lst) (add-login (rest lst) element))]
+        )   
+    )
 
 (provide (all-defined-out))
