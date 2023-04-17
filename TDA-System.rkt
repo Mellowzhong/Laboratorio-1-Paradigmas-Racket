@@ -1,6 +1,11 @@
 #lang racket
 (require "Fecha.rkt")
 
+;-----------------------Representacion-----------------------
+;Se presenta el TDA System, el cual corresponde tal y como indica su nombre a una representacion
+;del system, el cual contiene los usuarios, el nombre del system, las unidades y la fecha. Esta representacion
+;esta dada por una lista con estos elementos los cuales se ven en el constructor demonimado system
+
 ;-----------------------Constructor-----------------------
 ;Dominio: name(string)
 ;Recorrido: system (list)
@@ -14,7 +19,41 @@
            )
     )
 )
-;--------------------------------------------------------
+
+;-----------------------Pertenencia-----------------------
+;Dominio: lst (list)
+;Recorrido: boolean
+;Descripción: Si el ultimo elemento de la lista entregada es "select" devuelve #t, sino #f
+;Tipo de recursion: No empleada
+(define (Comprobation lst)
+    (if (equal? (last lst) "select") #t
+        #f
+    )
+)
+;Dominio: element (string) - lst (list)
+;Recorrido: boolean
+;Descripción: Filtra los elementos dentro de una lista
+;Tipo de recursion: Natural
+(define (filter-element element lst)
+  (cond [(null? lst) #f]
+        [(equal? element (car lst)) #t]
+        [else (filter-element element (cdr lst))]
+    )
+)
+
+;Dominio: element (string) - lst (list)
+;Recorrido: boolean
+;Descripción: Filtra los elementos dentro de una lista de listas
+;Tipo de recursion: Cola
+(define (filter-list elem lista)
+    (cond [(null? lista) #f]
+        [(list? (car lista))   
+         (or (filter-list elem (car lista)) 
+            (filter-list elem (cdr lista)))]
+        [(equal? elem (car lista)) #t]  
+        [else (filter-list elem (cdr lista))]
+    )
+)
 ;-----------------------Modificadores-----------------------
 ;Dominio:  sys(list) - unit-sys(string) - name-sys(string) - capacity-sys(string)
 ;Recorrido: system (list)
@@ -49,7 +88,10 @@
     )
 )
     
-
+;Dominio: sys (lst) - element (string)
+;Recorrido: system (list)
+;Descripción: Agrega una carpeta si este no se encuentra repetida
+;Tipo de recursion: No empleada
 (define md (lambda (sys element)
     (list (list-ref sys 0)
         (list-ref sys 1)
@@ -60,42 +102,15 @@
         )
     )
 )
-
+;Dominio: lst (list) - - element (string)
+;Recorrido: lista (list)
+;Descripción: Agrega un elemento a la lista
+;Tipo de recursion: No aplicada
 (define (add-element lst element)
     (cons element (last lst))
 )
-;--------------------------------------------------------
-;-----------------------Pertenencia-----------------------
-(define (Comprobation lst)
-    (if (equal? (last lst) "select") #t
-        #f
-    )
-)
-;Dominio: element (string) - lst (list)
-;Recorrido: boolean
-;Descripción: Filtra los elementos dentro de una lista
-;Tipo de recursion: Natural
-(define (filter-element element lst)
-  (cond [(null? lst) #f]
-        [(equal? element (car lst)) #t]
-        [else (filter-element element (cdr lst))]
-    )
-)
-;--------------------------------------------------------
+
 ;-----------------------Otras operaciones-----------------------
-;Dominio: element (string) - lst (list)
-;Recorrido: boolean
-;Descripción: Filtra los elementos dentro de una lista de listas
-;Tipo de recursion: Cola
-(define (filter-list elem lista)
-    (cond [(null? lista) #f]
-        [(list? (car lista))   
-         (or (filter-list elem (car lista)) 
-            (filter-list elem (cdr lista)))]
-        [(equal? elem (car lista)) #t]  
-        [else (filter-list elem (cdr lista))]
-    )
-)
 
 ;Dominio: lst (list) - element (string)
 ;Recorrido: System (list)
@@ -136,6 +151,7 @@
         (list list-2)
         (cons (car list-1) (unir (cdr list-1) list-2)));si la primera lista no es vacia, se hace car y cdrs para concatenar por partes
     )
+
 ;Dominio: sys(list) - function(string)
 ;Recorrido: function(string) - sys (list)
 ;Descripción: Recibe el sistema y la funcion a efectuar

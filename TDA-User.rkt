@@ -2,11 +2,12 @@
 (require "Fecha.rkt")
 (require "TDA-System.rkt")
 
-;-----------------------Modificadores-----------------------
-;Dominio: sys (list) - user (string)
-;Recorrido: system (list)
-;Descripción: Añade un usuario al sistema
-;Tipo de recursion: No empleada
+;-----------------------Representacion-----------------------
+;Se presenta el TDA User, el cual corresponde tal y como indica su nombre a una representacion
+;del usuario, la cual contiene el nombre y el estado de "logeo". Esta representacion esta dada
+;por una lista de esos elementos los cuales se modificaran dependiendo de lo que se le pida.
+
+;-----------------------Constructor-----------------------
 ;Dominio: sys (list) - user (string)
 ;Recorrido: system (list)
 ;Descripción: Añade un usuario al sistema
@@ -18,6 +19,7 @@
     )
 )
 
+;-----------------------Modificadores-----------------------
 ;Dominio: sys (list) - user (string)
 ;Recorrido: system (list)
 ;Descripción: Logea a los usuarios dejandolos con un true

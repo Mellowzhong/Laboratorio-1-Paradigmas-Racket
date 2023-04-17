@@ -8,3 +8,18 @@ Autoevaluacion   Puntaje
     logout          1
     switch-drive    0.5
     md              0.75
+    cd              0
+    add-file        0
+    del             0
+    rd              0
+    copy            0
+    move            0
+    ren             0
+    dir             0
+    format          0
+    encrypt         0
+    decrypt         0
+    plus-one        0
+    minus-one       0
+    grep            0
+    view-trash      0
