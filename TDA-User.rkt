@@ -1,48 +1,44 @@
 #lang racket
-(require "Fecha.rkt")
 (require "TDA-System.rkt")
-
+(require "Fecha.rkt")
 ;-----------------------Representacion-----------------------
 ;Se presenta el TDA User, el cual corresponde tal y como indica su nombre a una representacion
 ;del usuario, la cual contiene el nombre y el estado de "logeo". Esta representacion esta dada
 ;por una lista de esos elementos los cuales se modificaran dependiendo de lo que se le pida.
 
-;-----------------------Constructor-----------------------
+;-----------------------Modificadores-----------------------
 ;Dominio: sys (list) - user (string)
 ;Recorrido: system (list)
 ;Descripción: Añade un usuario al sistema
 ;Tipo de recursion: No empleada
 (define add-user (lambda (sys  user)
-    (if (filter-element user (list-ref sys 0)) sys
-         (cons (unir (list-ref sys 0) user) (cdr sys))
+    (if (filterElement (getUser sys) user) sys
+         (createSystem (cons user (getUser sys)) (getName sys) (getDrives sys) date-now)
         )
     )
 )
 
-;-----------------------Modificadores-----------------------
 ;Dominio: sys (list) - user (string)
 ;Recorrido: system (list)
 ;Descripción: Logea a los usuarios dejandolos con un true
 ;Tipo de recursion: No empleada
 (define login (lambda (sys user) 
-    (if (filter-element user (list-ref sys 0))
-            (list (add-login (list-ref sys 0) user)
-                (list-ref sys 1)
-                (list-ref sys 2)
-                date-now
-                ) 
-        (sys)
+    (if (filterElement (getUser sys) user)
+        (createSystem (add-login (getUser sys) user) (getName sys) (getDrives sys) date-now)
+        sys
         )
     )
 )
+
 ;Dominio: sys (list)
 ;Recorrido: sys (list)
 ;Descripción: Desloguea a los usuarios quitandoles el true
 ;Tipo de recursion: No empleada
 (define logout (lambda (sys)
-    (cons (filter string? (list-ref sys 0)) (cdr sys))
+    (cons (filter string? (getUser sys)) (cdr sys))
     )
 )
+
 ;-----------------------Otras operaciones-----------------------
 ;Dominio: lst (list) - element (string)
 ;Recorrido: System (list)

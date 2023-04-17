@@ -32,3 +32,5 @@
 (define S15 ((run S14 md) "folder2"))
 (define S16 ((run S15 md) "folder3"))
 
+;ingresa a carpeta folder2
+(define S17 ((run S16 cd) "folder2"))

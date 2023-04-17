@@ -6,9 +6,9 @@ Autoevaluacion   Puntaje
     register        1
     login           1
     logout          1
-    switch-drive    0.5
+    switch-drive    1
     md              0.75
-    cd              0
+    cd              0.25
     add-file        0
     del             0
     rd              0
