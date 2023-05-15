@@ -1,5 +1,27 @@
 #lang racket
+;-----------------------Representacion-----------------------
+;Se presenta el TDA Drives, el cual corresponde a tal y como indica su nombre a una representacion del drive,
+;el drive es el lugar donde se almacenan las unidades, las carpetas o archivos varios. Esta representacion esta dada
+;por una serie de funciones las cuales tendrian el fin de encontrar o modificar cosas de los drives.
 
+;-----------------------Constructor-----------------------
+;Dom: directory-info (list) - directory (list)
+;Rec: updated-directory (list)
+;Descripcion: Funcion que crea una carpeta en la carpeta seleccionada
+;Recursion: ninguno
+(define (sd-md directory-info directory)
+    (if (not (source-exists? (list-ref directory-info 0) directory))
+        (append directory (list (list-ref directory-info 0) null
+                                      (list (list-ref directory-info 1)
+                                            (list-ref directory-info 1)
+                                            (list-ref directory-info 2)
+                                            (list-ref directory-info 3)
+                                            (list-ref directory-info 4))))
+        directory
+    )
+)
+
+;-----------------------Modificadores-----------------------
 ;Dom: drive-letter (char) - drive-name (string) - drive-capacity (int) - system-drives (list)
 ;Rec: system-drives (list)
 ;Descripcion: Funcion que actualiza la lista de unidades cuando se añade una nueva unidad.
@@ -33,22 +55,63 @@
     )
 )
 
-;Dom: directory-info (list) - directory (list)
-;Rec: updated-directory (list)
-;Descripcion: Funcion que crea una carpeta en la carpeta seleccionada
-;Recursion: ninguno
-(define (sd-md directory-info directory)
-    (if (not (source-exists? (list-ref directory-info 0) directory))
-        (append directory (list (list-ref directory-info 0) null
-                                      (list (list-ref directory-info 1)
-                                            (list-ref directory-info 1)
-                                            (list-ref directory-info 2)
-                                            (list-ref directory-info 3)
-                                            (list-ref directory-info 4))))
-        directory
+;Dom: d-letter (char) - new-d-name (string) - system-drives (list) - l-aux (list)
+;Rec: system-drives
+;Descripcion: Funcion auxiliar de set-drives-format, formatea la unidad con la letra indicada
+;cambiandole el nombre, borrando todos los archivos que contiene y manteniendo su almacenamiento.
+;Tipo de recursión: cola
+(define (set-drives-format-aux d-letter new-d-name system-drives l-aux)
+    (if (null? system-drives)
+        l-aux
+        (if (and (char? (car system-drives)) (equal? d-letter (car system-drives)))
+            (set-drives-format-aux d-letter new-d-name (cddddr system-drives)
+                                   (append l-aux (list d-letter new-d-name
+                                                       (list-ref system-drives 2) null)))
+            (set-drives-format-aux d-letter new-d-name (cdr system-drives)
+                                   (append l-aux (list (car system-drives))))
+        )
     )
 )
 
+;Dom: d-letter (char) - new-d-name (string) - system-drives (list)
+;Rec: system-drives (list)
+;Descripcion: Funcion que actualiza la lista de unidades modificando la unidad con la letra seleccionada.
+;Tipo de recursión: No empleada
+(define (set-drives-format d-letter new-d-name system-drives)
+    (set-drives-format-aux d-letter new-d-name system-drives null)
+)
+
+;Dom: file (list) - directory (list)
+;Rec: updated-directory (list)
+;Descripcion: Funcion que añade un archivo en la carpeta seleccionada
+;Tipo de recursión: No empleada
+(define (sd-af file directory)
+    (if (not (source-exists? (car file) directory))
+        (append directory (list (list-ref file 0) (list-ref file 1) (list-ref file 2)
+                                (list (list-ref file 5) (list-ref file 3) (list-ref file 4))))
+        directory
+    )
+)
+;-----------------------Pertenencia-----------------------
+;Dom: source-name (char or string) - current-directory (list)
+;Rec: boolean
+;Descripcion: Funcion que identifica si existe una unidad, archivo o carpeta en la carpeta indicada.
+;Recursion: ninguno
+(define (source-exists? source-name current-directory)
+    (not (boolean? (member source-name current-directory)))
+)
+
+;Dom: directory-name (string) - directory (list)
+;Rec: boolean
+;Descripcion: Funcion que revisa si una carpeta esta vacia
+;Recursion: ninguno
+(define (empty-directory? directory-name directory)
+    (if (null? (list-ref (member directory-name directory) 1))
+        #t
+        #f
+    )
+)
+;-----------------------Otras operaciones-----------------------
 ;Dom: letter-selected-drive (char) - drives-system (list)
 ;Rec: selected-directory (list)
 ;Descripcion: Funcion que obtiene los archivos y carpetas de la unidad selecciada en la ruta.
@@ -101,25 +164,6 @@
 ;Recursion: ninguno
 (define (is-a-file? filename)
     (is-a-file?-aux (string->list filename))
-)
-
-;Dom: source-name (char or string) - current-directory (list)
-;Rec: boolean
-;Descripcion: Funcion que identifica si existe una unidad, archivo o carpeta en la carpeta indicada.
-;Recursion: ninguno
-(define (source-exists? source-name current-directory)
-    (not (boolean? (member source-name current-directory)))
-)
-
-;Dom: directory-name (string) - directory (list)
-;Rec: boolean
-;Descripcion: Funcion que revisa si una carpeta esta vacia
-;Recursion: ninguno
-(define (empty-directory? directory-name directory)
-    (if (null? (list-ref (member directory-name directory) 1))
-        #t
-        #f
-    )
 )
 
 ;Dom: filename (string) - actual-directory (list) - file (null)

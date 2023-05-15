@@ -9,14 +9,14 @@ Autoevaluacion   Puntaje
     switch-drive    1
     md              1
     cd              1
-    add-file        0
+    add-file        1
     del             0
     rd              0
     copy            0
     move            0
     ren             0
     dir             0
-    format          0
+    format          1
     encrypt         0
     decrypt         0
     plus-one        0

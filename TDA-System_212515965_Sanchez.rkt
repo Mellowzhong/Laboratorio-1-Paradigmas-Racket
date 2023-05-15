@@ -10,22 +10,36 @@
 ;esta dada por una lista con estos elementos los cuales se ven en el constructor demonimado system y set-system.
 
 ;-----------------------Constructor-----------------------
-;Descripcion: Funcion que crea un sistema.
 ;Dom: system-name (string)
 ;Rec: system (list)
+;Descripcion: Funcion que crea un sistema.
 ;Tipo de recursión: No empleada
 (define (system system-name)
   (list (get-current-date) system-name null null null null)
 )
 
-;Descripcion: Funcion que recopila y une los datos del sistema.
 ;Dom: system=name (string) X system-drives (list) X system-users (list) X system-path (list)
 ;Rec: system (list)
+;Descripcion: Funcion que recopila y une los datos del sistema.
 ;Tipo de recursión: No empleada
 (define (set-system system-name system-drives system-users system-path system-rb)
   (list (get-current-date) system-name system-drives system-users system-path system-rb)
 )
 
+;Dom: name-file (string) - type-file (string) - content-file (string) - hidden? (char or null) - only-read? (char or null)
+;Rec: file (list)
+;Descripcion: Funcion que crea un archivo.
+;Tipo de recursión: No empleada
+(define (file name-file type-file content-file . args)
+    (cond [(null? args)
+            (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #f #f)]
+        [(equal? (length args) 1)
+            (if (equal? (car args) #\h)
+                (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #t #f)
+                (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #f #t))]
+        [else (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #t #t)]
+    )
+)
 ;-----------------------Modificadores-----------------------
 ;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - d-letter (char) - d-name (string)  - d-capacity (string)
 ;Rec: updated-system (list)
@@ -131,16 +145,16 @@
 ;la ruta del sistema sin antes verificar que la unidad seleccionada exista.
 ;Tipo de recursión: No empleada
 (define switch-drive-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (d-letter)
-    (if (source-exists? d-letter s-drives)
+    (if (and (source-exists? d-letter s-drives) (someone-logged-in? s-users))
         (set-system s-name s-drives s-users (set-path-sd d-letter) s-rb)
         (set-system s-name s-drives s-users s-path s-rb)
     )
     ))
 )
 
-;Descripcion: Funcion que cambia la unidad en la que se quiere trabajar.
-;Dom: outdated-system (list) X letter-drive (char)
+;Dom: outdated-system (list) - letter-drive (char)
 ;Rec: updated-system (list)
+;Descripcion: Funcion que cambia la unidad en la que se quiere trabajar.
 ;Tipo de recursión: No empleada
 (define switch-drive (lambda (outd-system) (lambda (d-letter)
     ((switch-drive-aux (get-system-name outd-system) (get-system-drives outd-system) 
@@ -245,10 +259,62 @@
     ))
 )
 
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - d-letter (char) - new-d-name (char)
+;Rec: updated-system (list)
+;Descripcion: Funcion auxiliar de format, actualiza la lista de unidades en el caso
+;de que exista un usuario logueado.
+;Tipo de recursión: No empleada
+(define format-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (d-letter new-d-name)
+    (if (and (someone-logged-in? s-users) (s-path-is-out-t-path? s-path (list d-letter)))
+        (set-system s-name (set-drives-format d-letter new-d-name s-drives) s-users s-path s-rb)
+        (set-system s-name s-drives s-users s-path s-rb)
+    )
+    ))
+)
+
+;Dom: outdated-system (list) - d-letter (char) - new-d-name (string)
+;Rec: updated-system (list)
+;Descripcion: Funcion que busca formatear una unidad dentro del sistema.
+;Tipo de recursión: No empleada
+(define format (lambda (outd-system) (lambda (d-letter new-d-name)
+    ((format-aux (get-system-name outd-system) (get-system-drives outd-system)
+                 (get-system-users outd-system) (get-system-path outd-system)
+                 (get-system-rb outd-system)) 
+                 (char-downcase d-letter) (string-downcase new-d-name))
+    ))
+)
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - file (list)
+;Rec: outdated-system (list)
+;Descripcion: Funcion auxiliar de add-file, añade archivos en caso de que no exista uno con el
+;mismo nombre en la carpeta seleccionada en la ruta.
+;Tipo de recursión: ninguna
+(define add-file-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (file)
+    (if (someone-logged-in? s-users)
+        (set-system s-name (set-drives-rec (append file (list (get-logged-user s-users))) 
+                                            sd-af s-drives s-path) 
+                            s-users s-path s-rb)
+        (set-system s-name s-drives s-users s-path s-rb)
+    )
+    ))
+)
+
+;Dom: outdated-system (list) - file (list)
+;Rec: updated-system (list)
+;Descripcion: Funcion que añade archivos a la carpeta actual donde se encuentra la ruta.
+;Tipo de recursión: No empleada
+(define add-file (lambda (outd-system) (lambda (file)
+    ((add-file-aux (get-system-name outd-system) (get-system-drives outd-system) 
+                   (get-system-users outd-system) (get-system-path outd-system)
+                   (get-system-rb outd-system))
+                    file)
+    ))
+)
+
 ;-----------------------Otras operaciones-----------------------
-;Descripcion: Funcion que permite ejecutar una funcion sobre el sistema.
 ;Dom: outdated-system (list) X function (function)
 ;Rec: updated-system (list)
+;Descripcion: Funcion que permite ejecutar una funcion sobre el sistema.
 ;Tipo de recursión: No empleada
 (define (run outd-system function)
     (curry function outd-system)

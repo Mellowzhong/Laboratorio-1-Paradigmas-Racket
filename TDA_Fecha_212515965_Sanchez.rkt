@@ -1,6 +1,28 @@
 #lang racket
 (require racket/date)
 
+;-----------------------Representacion-----------------------
+;Se presenta el TDA Fecha el cual corresponde tal y como indica su nombre a una representación
+;de fecha en forma estructurada. Esta representacón esta dada por una serie de funciones las
+;cuales tienen como objetivo obtener la fecha actual.
+
+;-----------------------Representacion-----------------------
+;Dom: null
+;Rec: fecha-actual (string)
+;Descripcion: Funcion que recopila todos los datos de la fecha actual y crea una fecha en forma de string
+;Recursion: ninguno
+(define (get-current-date)
+    (string-append
+        (get-current-day)
+        "/"
+        (get-current-month)
+        "/"
+        (get-current-year)
+        " "
+        (get-current-hour)
+    )
+)
+
 ;-----------------------Otras operaciones-----------------------
 ;Dom: null
 ;Rec: dia-actual (int)
@@ -37,22 +59,6 @@
         (number->string (date-minute (current-date)))
         ":"
         (number->string (date-second (current-date)))
-    )
-)
-
-;Dom: null
-;Rec: fecha-actual (string)
-;Descripcion: Funcion que recopila todos los datos de la fecha actual
-;Recursion: ninguno
-(define (get-current-date)
-    (string-append
-        (get-current-day)
-        "/"
-        (get-current-month)
-        "/"
-        (get-current-year)
-        " "
-        (get-current-hour)
     )
 )
 

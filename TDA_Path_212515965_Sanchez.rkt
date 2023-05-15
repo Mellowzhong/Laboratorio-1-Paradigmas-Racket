@@ -211,4 +211,28 @@
     (new-string-path->list-path-aux (string->list path) null null)
 )
 
+;Dom: s-path (list) X t-path (list)
+;Rec: boolean
+;Descipcion: Funcion que identifica si la ruta del sistema esta dentro de la ruta objetivo
+;Tipo de recursión: cola
+(define (s-path-is-out-t-path? s-path t-path)
+    (if (null? s-path)
+        #t
+        (if (null? t-path)
+        #f
+            (if (and (char? (car s-path)) (char? (car t-path)))
+                (if (equal? (car s-path) (car t-path))
+                    (s-path-is-out-t-path? (cdr s-path) (cdr t-path))
+                    #t
+                )
+                (if (string=? (car s-path) (car t-path))
+                    (s-path-is-out-t-path? (cdr s-path) (cdr t-path))
+                    #t
+                )
+            )
+        )
+    
+    )
+)
+
 (provide (all-defined-out))
