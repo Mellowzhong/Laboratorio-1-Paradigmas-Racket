@@ -60,3 +60,15 @@
 (define S33 ((run S32 add-file) (file "foo2.txt" "txt" "hello world 2")))
 (define S34 ((run S33 add-file) (file "foo3.docx" "docx" "hello world 3")))
 (define S35 ((run S34 add-file) (file "goo4.docx" "docx" "hello world 4" #\h #\r))) ;con atributos de seguridad oculto (h) y de solo lectura (r)
+;eliminando archivos
+(define S36 ((run S35 del) "*.txt"))
+(define S37 ((run S35 del) "f*.docx"))
+(define S38 ((run S35 del) "goo4.docx"))
+(define S39 ((run S35 cd) ".."))
+(define S40 ((run S39 del) "folder1"))
+;borrando una carpeta
+(define S41 ((run S39 rd) "folder1")) ;no debería borrarla, pues tiene archivos
+(define S42 ((run S41 cd) "folder1"))
+(define S43 ((run S42 del) "*.*"))
+(define S44 ((run S43 cd) ".."))
+(define S45 ((run S44 rd) "folder1"))

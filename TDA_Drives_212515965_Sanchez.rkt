@@ -92,6 +92,143 @@
         directory
     )
 )
+
+;Dom: directory (list) - l-aux (list)
+;Rec: directory (list)
+;Descripcion: Funcion auxiliar de sd-all-files, elimina todos los archivos que encuentre dentro de la carpeta.
+;Tipo de recursión: cola
+(define (sd-del-all-files-aux directory l-aux)
+    (if (null? directory)
+        l-aux
+        (if (string? (car directory))
+            (if (is-a-file? (car directory)) 
+                (sd-del-all-files-aux (cddddr directory) l-aux)
+                (sd-del-all-files-aux (cdr directory) (append l-aux (list (car directory))))
+            )
+            (sd-del-all-files-aux (cdr directory) (append l-aux (list (car directory))))
+        )
+    )
+)
+
+;Dom: directory (list)
+;Rec: updated-directory (list)
+;Descripcion: Funcion que borra todos los archivos dentro de una carpeta
+;Tipo de recursión: No empleada
+(define (sd-del-all-files filename directory)
+    (sd-del-all-files-aux directory null)
+)
+
+;Dom: pattern-info (list) - directory (list) - l-aux (list)
+;Rec: directory (list)
+;Descripcion: Funcion auxiliar de sd-del-files-by-pattern, elimina archivos segun un patron.
+;Tipo de recursión: cola
+(define (sd-del-files-by-pattern-aux pattern-info directory l-2)
+    (if (null? directory)
+        l-2
+        (if (string? (car directory))
+            (if (and (is-a-file? (car directory))
+                     (string=? (list-ref directory 1) (list-ref pattern-info 1))
+                     (file-meets-string-pattern? (car directory) pattern-info)
+                     (not (hidden-file? (car directory) directory)))
+                (sd-del-files-by-pattern-aux pattern-info (cddddr directory) l-2)
+                (sd-del-files-by-pattern-aux pattern-info (cdr directory)
+                                                       (append l-2 (list (car directory))))
+            )
+            (sd-del-files-by-pattern-aux pattern-info (cdr directory)
+                                                   (append l-2 (list (car directory))))
+        )
+    )
+)
+
+;Dom: filepattern (string) - directory (list)
+;Rec: updated-directory
+;Descripcion: Funcion que elimina todos los archivos segun un patron dentro de una carpeta.
+;Tipo de recursión: No empleada
+(define (sd-del-files-by-pattern filepattern directory)
+    (sd-del-files-by-pattern-aux (get-file-pattern-info filepattern) directory null)
+)
+
+;Dom: filename (string) - directory (list) - l-aux (list)
+;Rec: updated-directory
+;Descripcion: Funcion auxiliar de sd-del-file, elimina el archivo indicado dentro de la carpeta.
+;Tipo de recursión: cola
+(define (sd-del-file-aux filename directory l-aux)
+    (if (null? directory)
+        l-aux
+        (if (and (string? (car directory)) (string=? filename (car directory)))
+            (sd-del-file-aux filename (cddddr directory) l-aux)
+            (sd-del-file-aux filename (cdr directory) (append l-aux (list (car directory))))
+        )
+    )
+)
+
+;Dom: filename (string) - directory (list)
+;Rec: directory (list)
+;Descripcion: Funcion que elimina un archivo en concreto
+;Tipo de recursión: No empleada
+(define (sd-del-file filename directory)
+    (if (and (source-exists? filename directory) (not (hidden-file? filename directory)))
+        (sd-del-file-aux filename directory null)
+        directory
+    )
+)
+
+;Dom: directory-name (string) - directory (list) - l-aux (list)
+;Rec: directory (list)
+;Descripcion: Funcion auxiliar de sd-del-directory, elimina la carpeta que 
+;esta dentro de la carpeta seleccionada.
+;Tipo de recursión: cola
+(define (sd-del-directory-aux directory-name directory l-aux)
+    (if (null? directory)
+        l-aux
+        (if (and (string? (car directory)) (string=? directory-name (car directory)))
+            (sd-del-directory-aux directory-name (cdddr directory) l-aux)
+            (sd-del-directory-aux directory-name (cdr directory) (append l-aux (list (car directory))))
+        )
+    )
+)
+
+;Dom: directory-name (string) - directory (list)
+;Rec: directory (list)
+;Descripcion: Funcion que elimina una carpeta con la funcion del.
+;Tipo de recursión: No empleada
+(define (sd-del-directory directory-name directory)
+        (if (source-exists? directory-name directory)
+            (sd-del-directory-aux directory-name directory null)
+            directory
+        )
+)
+
+;Dom: directory-name (string) - directory (list) - l-2 (list)
+;Rec: directory (list)
+;Descripcion: Funcion auxiliar de sd-rd, elimina una carpeta en el caso de que este vacia.
+;Tipo de recursión: cola
+(define (sd-rd-aux directory-name directory l-2)
+    (if (null? directory)
+        l-2
+        (if (string? (car directory))
+            (if (string=? (car directory) directory-name)
+                (sd-rd-aux directory-name (cdddr directory) l-2)
+                (sd-rd-aux directory-name (cdr directory)
+                                      (append l-2 (list (car directory))))
+            )
+            (sd-rd-aux directory-name (cdr directory) (append l-2 (list (car directory))))
+        )
+    )
+)
+
+;Dom: directory-name (string) - directory (list)
+;Rec: directory (list)
+;Descripcion: Funcion que elimina una carpeta solamente si esta vacia
+;Tipo de recursión: No empleada
+(define (sd-rd directory-name directory)
+    (if (and (source-exists? directory-name directory)
+             (empty-directory? directory-name directory))
+        (sd-rd-aux directory-name directory null)
+        directory
+    )
+)
+
 ;-----------------------Pertenencia-----------------------
 ;Dom: source-name (char or string) - current-directory (list)
 ;Rec: boolean
@@ -111,7 +248,99 @@
         #f
     )
 )
+
+;Dom: filename-l (list)
+;Rec: boolean
+;Descripcion: Funcion auxiliar de is-a-file-pattern?, identifica si el filename es un patron.
+;Tipo de recursión: cola
+(define (is-a-file-pattern?-aux filename-l)
+    (if (null? filename-l)
+        #f
+        (if (equal? (car filename-l) #\*)
+            #t
+            (is-a-file-pattern?-aux (cdr filename-l))
+        )
+    )
+)
+
+;Dom: filename (string)
+;Rec: boolean
+;Descripcion: Funcion que identifica si el nombre del archivo es un patron, primero revisa
+;el caso en que sea para todos los archivos.
+;Tipo de recursión: ninguna
+(define (is-a-file-pattern? filename)
+    (if (string=? filename "*.*")
+        #t
+        (is-a-file-pattern?-aux (string->list filename)))
+)
+
+;Dom: filename (string)
+;Rec: boolean
+;Descripcion: Funcion que identifica si el patron selecciona a todos los archivos de la carpeta.
+;Tipo de recursión: No empleada
+(define (is-for-all-files? filename)
+    (if (string=? filename "*.*")
+        #t
+        #f
+    )
+)
+
+;Dom: filename (string) - directory (list)
+;Rec: boolean
+;Descripcion: Funcion que identifica si un archivo esta oculto.
+;Tipo de recursión: No empleada
+(define (hidden-file? filename directory)
+    (if (list-ref (list-ref (member filename directory) 3) 1)
+        #t #f
+    )
+)
+
+;Dom: file-name (string) - patter-info (list)
+;Rec: boolean
+;Descripcion: Funcion que identifica si un archivo cumple el patrion de string.
+;Tipo de recursión: No empleada
+(define (file-meets-string-pattern? filename pattern-info)
+    (if (null? (list-ref pattern-info 0))
+            #t
+        (if (regexp-match
+            (string-append "^" (list-ref pattern-info 0))
+            filename
+            )
+            #t
+            #f
+        )
+    )
+)
 ;-----------------------Otras operaciones-----------------------
+;Dom: filepattern-l (list) - l-2 (list) - l-3 (list)
+;Rec: file-pattern-info (list)
+;Descripcion: Funcion auxiliar de get-file-pattern-info,
+;recoge la informacion que contiene el patron de archivos.
+;Tipo de recursión: cola
+(define (get-file-pattern-info-aux filepattern-l l-2 l-3)
+    (if (null? filepattern-l)
+        (append l-3 (list (list->string l-2)))
+        (if (equal? (car filepattern-l) #\*)
+            (if (null? l-2)
+                (get-file-pattern-info-aux (cddr filepattern-l) null (append l-3 (list null)))
+                (get-file-pattern-info-aux (cddr filepattern-l) null
+                                           (append l-3 (list (list->string l-2))))
+            )
+            (get-file-pattern-info-aux (cdr filepattern-l) (append l-2 (list (car filepattern-l)))
+                                        l-3)
+        )
+    )
+)
+
+;Dom: filepattern (string)
+;Rec: filepattern-info (list)
+;Descripcion: Funcion que retorna una lista con toda la informacion del patron.
+;Tipo de recursión: No empleada
+(define (get-file-pattern-info filepattern)
+    (get-file-pattern-info-aux (string->list filepattern) null null)
+)
+
+
 ;Dom: letter-selected-drive (char) - drives-system (list)
 ;Rec: selected-directory (list)
 ;Descripcion: Funcion que obtiene los archivos y carpetas de la unidad selecciada en la ruta.

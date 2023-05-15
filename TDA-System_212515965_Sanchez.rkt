@@ -3,6 +3,7 @@
 (require "TDA_Drives_212515965_Sanchez.rkt")
 (require "TDA-User_212515965_Sanchez.rkt")
 (require "TDA_Path_212515965_Sanchez.rkt")
+(require "TDA_Recycle-Bin_212515965_Sanchez.rkt")
 
 ;-----------------------Representacion-----------------------
 ;Se presenta el TDA System, el cual corresponde tal y como indica su nombre a una representacion
@@ -308,6 +309,95 @@
                    (get-system-users outd-system) (get-system-path outd-system)
                    (get-system-rb outd-system))
                     file)
+    ))
+)
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - filename (string)
+;Rec: updated-system
+;Descripcion: Funcion auxiiliar de del, elimina archivos o carpetas, ademas es capaz de eliminar
+;archivos segun un patron, lo que elimine se ira a la papelera de reciclaje.
+;Tipo de recursión: No empleada
+(define del-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (filename)
+    (if (someone-logged-in? s-users)
+        (cond [(is-a-file-pattern? filename)
+                (if (is-for-all-files? filename)
+                    (set-system s-name (set-drives-rec filename sd-del-all-files s-drives s-path)
+                                s-users s-path (move-all-files-to-rb filename s-drives s-path s-rb))
+                    (set-system s-name (set-drives-rec filename sd-del-files-by-pattern s-drives s-path) 
+                                s-users s-path (move-file-by-pattern-to-rb filename s-drives s-path s-rb))
+                )]
+            [(is-a-file? filename)
+                (set-system s-name (set-drives-rec filename sd-del-file s-drives s-path) 
+                            s-users s-path (move-file-to-rb filename s-drives s-path s-rb))]
+            [else
+                (set-system s-name (set-drives-rec filename sd-del-directory s-drives s-path) 
+                            s-users s-path (move-directory-to-rb filename s-drives s-path s-rb))]
+        )
+        (set-system s-name s-drives s-users s-path s-rb)
+    )
+    ))
+)
+
+;Dom: outdated-system (list) - filename (string)
+;Rec: updated-system
+;Descripcion: Funcion que elimina carpetas o archivos y los manda a la papelera.
+;Tipo de recursión: No empleada
+(define del (lambda (outd-system) (lambda (filename)
+    ((del-aux (get-system-name outd-system) (get-system-drives outd-system) 
+              (get-system-users outd-system) (get-system-path outd-system)
+              (get-system-rb outd-system))
+               (string-downcase filename))
+    ))
+)
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - directory-name (string) - t-path (list)
+;Rec: updated-system (list)
+;Descripcion: Segunda funcion secundaria de rd, se encarga de eliminar la carpeta en caso
+;en caso de que la ruta del sistema no este dentro de la ruta objetivo.
+;Tipo de recursión: No empleada
+(define rd-aux2 (lambda (s-name s-drives s-users s-path s-rb) (lambda (directory-name t-path)
+    (if (and (someone-logged-in? s-users) (s-path-is-out-t-path? s-path t-path))
+        (set-system s-name (set-drives-rec directory-name sd-rd s-drives t-path) s-users s-path s-rb)
+        (set-system s-name s-drives s-users s-path s-rb)
+    )
+    ))
+)
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - directory-name (string)
+;Rec: updated-system (list)
+;Descripcion: Primera funcion secundaria de rd, se encarga de extraer el nombre de la carpeta
+;y su ruta en caso de ser necesario y en caso de que existan, luego se lo manda a la funcion secundaria
+;Tipo de recursión: No empleada
+(define rd-aux1 (lambda (s-name s-drives s-users s-path s-rb) (lambda (directory-name)
+    (if (string-is-path? directory-name)
+        (if (is-path-a-new-path? directory-name)
+            (if (not (equal? s-path (set-path-new-path-rd directory-name s-path s-drives))) 
+                ((rd-aux2 s-name s-drives s-users s-path s-rb)
+                          (get-f-directory-from-sp-new-path directory-name s-path s-drives)
+                          (set-path-new-path-rd directory-name s-path s-drives))
+                (set-system s-name s-drives s-users s-path s-rb)    
+            )
+            (if (not (equal? s-path (set-path-add-path-rd directory-name s-path s-drives)))
+                ((rd-aux2 s-name s-drives s-users s-path s-rb)
+                          (get-f-directory-from-sp-add-path directory-name s-path s-drives)
+                          (set-path-add-path-rd directory-name s-path s-drives))
+                (set-system s-name s-drives s-users s-path s-rb)    
+            )
+        )
+        ((rd-aux2 s-name s-drives s-users s-path s-rb) directory-name s-path)
+    )
+    ))
+)
+
+;Dom: outdated-system (list)
+;Rec: updated-system (list)
+;Descripcion: Funcion que elimina carpetas de forma permanente.
+;Tipo de recursión: No empleada
+(define rd (lambda (outd-system) (lambda (directory-name)
+    ((rd-aux1 (get-system-name outd-system) (get-system-drives outd-system) 
+             (get-system-users outd-system) (get-system-path outd-system)
+             (get-system-rb outd-system))
+             (string-downcase directory-name))
     ))
 )
 

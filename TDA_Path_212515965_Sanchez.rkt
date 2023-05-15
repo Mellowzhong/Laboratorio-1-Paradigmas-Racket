@@ -133,6 +133,24 @@
     )
 )
 
+;Dom: directory-path (string) - system-path (list) - system-drives (list)
+;Rec: directory-name (list)
+;Descipcion: Funcion que recopila la ruta dada cuando se usa la funcion rd y se da una ruta
+;que empieza desde el origen.
+;Tipo de recursión: No empleada
+(define (set-path-new-path-rd directory-path system-path system-drives)
+    (reverse (cdr (reverse (set-path-new-path directory-path system-path system-drives))))
+)
+
+;Dom: directory-path (string) - system-path (list) - system-drives (list)
+;Rec: new-directory-path (list)
+;Descipcion: Funcion que recopila la ruta dada cuando se usa la funcion rd y se da
+;una ruta que se adhiere a la ruta del sistema.
+;Tipo de recursión: No empleada
+(define (set-path-add-path-rd directory-path system-path system-drives)
+    (reverse (cdr (reverse (set-path-add-path directory-path system-path system-drives))))
+)
+
 ;-----------------------Otras operaciones-----------------------
 ;Dom: list-path (list)
 ;Rec: boolean
@@ -233,6 +251,24 @@
         )
     
     )
+)
+
+;Dom: directory-path (string) - directory-path (list) - directory-drives (list)
+;Rec: directory-name (list)
+;Descipcion: Funcion que obtiene el nombre de la carpeta que se quiere eliminar y esta dentro
+;de la ruta que se adhiere a la ruta del sistema.
+;Tipo de recursión: No empleada
+(define (get-f-directory-from-sp-new-path directory-path system-path system-drives)
+    (car (reverse (set-path-new-path directory-path system-path system-drives)))
+)
+
+;Dom: directory-path (string) - system-path (list) - system-drives (list)
+;Rec: directory-name (string)
+;Descipcion: Funcion que consigue el nombre de la carpeta que se quiere eliminar y esta metido
+;dentro de la ruta que comienza desde el origen.
+;Tipo de recursión: No empleada
+(define (get-f-directory-from-sp-add-path directory-path system-path system-drives)
+    (car (reverse (set-path-add-path directory-path system-path system-drives)))
 )
 
 (provide (all-defined-out))
