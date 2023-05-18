@@ -6,25 +6,29 @@
 ;el cual es la direccion hacia donde uno se debe mover dentro del sistema. Esta respresentación esta dada
 ;por una serie de funciones las cuales permitiran conocer las rutas por donde se debera mover en el 
 ;sistema pasando de un string (ruta dada por el usuario) a una lista para poder indendtidicar
-;lo anterior mencionado.
 
 ;-----------------------Pertenencia-----------------------
-;Dom: actual-path (list) - actual-directory (list)
+;Dom: s-path (list) - t-path (list)
 ;Rec: boolean
-;Descripcion: Funcion recursiva auxiliar que identifica si la ruta pasada existe en el sistema.
+;Descipcion: Funcion que identifica si la ruta del sistema esta dentro de la ruta objetivo
 ;Tipo de recursión: cola
-(define (path-exists?-aux current-path current-directory)
-    (if (null? current-path)
+(define (s-path-is-out-t-path? s-path t-path)
+    (if (null? s-path)
         #t
-        (if (source-exists? (car current-path) current-directory)
-            (if (char? (car current-path))
-                (path-exists?-aux (cdr current-path) (get-selected-directory-drive (car current-path) 
-                                  current-directory))
-                (path-exists?-aux (cdr current-path) (get-selected-directory-directory (car current-path)
-                                  current-directory))
+        (if (null? t-path)
+        #f
+            (if (and (char? (car s-path)) (char? (car t-path)))
+                (if (equal? (car s-path) (car t-path))
+                    (s-path-is-out-t-path? (cdr s-path) (cdr t-path))
+                    #t
+                )
+                (if (string=? (car s-path) (car t-path))
+                    (s-path-is-out-t-path? (cdr s-path) (cdr t-path))
+                    #t
+                )
             )
-            #f
         )
+    
     )
 )
 
@@ -36,20 +40,6 @@
     (path-exists?-aux path drives-system)
 )
 
-;Dom: foldername (list)
-;Rec: boolean
-;Descripcion: Funcion recursiva auxiliar que busca el char '/'  para identificar si el foldername es una ruta.
-;Tipo de recursión: cola
-(define (string-is-path?-aux string-list)
-    (if (null? string-list)
-        #f
-        (if (equal? (car string-list) #\/)
-            #t
-            (string-is-path?-aux (cdr string-list))
-        )
-    )
-)
-
 ;Dom: foldername (string)
 ;Rec: boolean
 ;Descripcion: Funcion que busca que el foldername entregado es una ruta.
@@ -57,6 +47,35 @@
 (define (string-is-path? string)
     (string-is-path?-aux (string->list string))
 )
+
+;Dom: path (string)
+;Rec: boolean
+;Descripcion: Funcion que identifica si el string de ruta entregado es uno que se mueve con la ruta
+;actual o comienza desde un origen.
+;Tipo de recursión: No empleada
+(define (is-path-a-new-path? path)
+    (is-path-a-new-path?-aux (string->list path))
+)
+
+;-----------------------Selectores-----------------------
+;Dom: directory-path (string) - system-path (list) - system-drives (list)
+;Rec: directory-name (string)
+;Descipcion: Funcion que consigue el nombre de la carpeta que se quiere eliminar y esta metido
+;dentro de la ruta que comienza desde el origen.
+;Tipo de recursión: No empleada
+(define (get-f-directory-from-sp-add-path directory-path system-path system-drives)
+    (car (reverse (set-path-add-path directory-path system-path system-drives)))
+)
+
+;Dom: directory-path (string) - directory-path (list) - directory-drives (list)
+;Rec: directory-name (list)
+;Descipcion: Funcion que obtiene el nombre de la carpeta que se quiere eliminar y esta dentro
+;de la ruta que se adhiere a la ruta del sistema.
+;Tipo de recursión: No empleada
+(define (get-f-directory-from-sp-new-path directory-path system-path system-drives)
+    (car (reverse (set-path-new-path directory-path system-path system-drives)))
+)
+
 ;-----------------------Modificadores-----------------------
 ;Dom: drive-letter (char)
 ;Rec: system-path (list)
@@ -134,15 +153,6 @@
 )
 
 ;Dom: directory-path (string) - system-path (list) - system-drives (list)
-;Rec: directory-name (list)
-;Descipcion: Funcion que recopila la ruta dada cuando se usa la funcion rd y se da una ruta
-;que empieza desde el origen.
-;Tipo de recursión: No empleada
-(define (set-path-new-path-rd directory-path system-path system-drives)
-    (reverse (cdr (reverse (set-path-new-path directory-path system-path system-drives))))
-)
-
-;Dom: directory-path (string) - system-path (list) - system-drives (list)
 ;Rec: new-directory-path (list)
 ;Descipcion: Funcion que recopila la ruta dada cuando se usa la funcion rd y se da
 ;una ruta que se adhiere a la ruta del sistema.
@@ -151,12 +161,55 @@
     (reverse (cdr (reverse (set-path-add-path directory-path system-path system-drives))))
 )
 
-;-----------------------Otras operaciones-----------------------
+;Dom: directory-path (string) - system-path (list) - system-drives (list)
+;Rec: directory-name (list)
+;Descipcion: Funcion que recopila la ruta dada cuando se usa la funcion rd y se da una ruta
+;que empieza desde el origen.
+;Tipo de recursión: No empleada
+(define (set-path-new-path-rd directory-path system-path system-drives)
+    (reverse (cdr (reverse (set-path-new-path directory-path system-path system-drives))))
+)
+
+;-----------------------Otras funciones-----------------------
+;Dom: actual-path (list) - actual-directory (list)
+;Rec: boolean
+;Descripcion: Funcion recursiva auxiliar que identifica si la ruta pasada existe en el sistema.
+;Tipo de recursión: cola
+(define (path-exists?-aux current-path current-directory)
+    (if (null? current-path)
+        #t
+        (if (source-exists? (car current-path) current-directory)
+            (if (char? (car current-path))
+                (path-exists?-aux (cdr current-path) (get-selected-directory-drive (car current-path) 
+                                  current-directory))
+                (path-exists?-aux (cdr current-path) (get-selected-directory-directory (car current-path)
+                                  current-directory))
+            )
+            #f
+        )
+    )
+)
+
+;Dom: foldername (list)
+;Rec: boolean
+;Descripcion: Funcion recursiva auxiliar que busca el char '/' 
+;para identificar si el foldername es una ruta.
+;Tipo de recursión: cola
+(define (string-is-path?-aux string-list)
+    (if (null? string-list)
+        #f
+        (if (equal? (car string-list) #\/)
+            #t
+            (string-is-path?-aux (cdr string-list))
+        )
+    )
+)
+
 ;Dom: list-path (list)
 ;Rec: boolean
 ;Descripcion: Funcion recursiva auxiliar que busca el char ':' para identificar si la ruta
 ;entregada comienza desde el origen.
-;Tipo de recursión: cola
+;Tipo de recursión: No empleada
 (define (is-path-a-new-path?-aux path-l)
     (if (null? path-l)
         #f
@@ -165,15 +218,6 @@
             (is-path-a-new-path?-aux (cdr path-l))
         )
     )
-)
-
-;Dom: path (string)
-;Rec: boolean
-;Descripcion: Funcion que identifica si el string de ruta entregado es uno que se mueve con la ruta
-;actual o comienza desde un origen.
-;Tipo de recursión: No empleada
-(define (is-path-a-new-path? path)
-    (is-path-a-new-path?-aux (string->list path))
 )
 
 ;Dom: list-char-path (list) - list-char (list) - list-path (list)
@@ -227,48 +271,6 @@
 ;Tipo de recursión: No empleada
 (define (new-string-path->list-path path)
     (new-string-path->list-path-aux (string->list path) null null)
-)
-
-;Dom: s-path (list) X t-path (list)
-;Rec: boolean
-;Descipcion: Funcion que identifica si la ruta del sistema esta dentro de la ruta objetivo
-;Tipo de recursión: cola
-(define (s-path-is-out-t-path? s-path t-path)
-    (if (null? s-path)
-        #t
-        (if (null? t-path)
-        #f
-            (if (and (char? (car s-path)) (char? (car t-path)))
-                (if (equal? (car s-path) (car t-path))
-                    (s-path-is-out-t-path? (cdr s-path) (cdr t-path))
-                    #t
-                )
-                (if (string=? (car s-path) (car t-path))
-                    (s-path-is-out-t-path? (cdr s-path) (cdr t-path))
-                    #t
-                )
-            )
-        )
-    
-    )
-)
-
-;Dom: directory-path (string) - directory-path (list) - directory-drives (list)
-;Rec: directory-name (list)
-;Descipcion: Funcion que obtiene el nombre de la carpeta que se quiere eliminar y esta dentro
-;de la ruta que se adhiere a la ruta del sistema.
-;Tipo de recursión: No empleada
-(define (get-f-directory-from-sp-new-path directory-path system-path system-drives)
-    (car (reverse (set-path-new-path directory-path system-path system-drives)))
-)
-
-;Dom: directory-path (string) - system-path (list) - system-drives (list)
-;Rec: directory-name (string)
-;Descipcion: Funcion que consigue el nombre de la carpeta que se quiere eliminar y esta metido
-;dentro de la ruta que comienza desde el origen.
-;Tipo de recursión: No empleada
-(define (get-f-directory-from-sp-add-path directory-path system-path system-drives)
-    (car (reverse (set-path-add-path directory-path system-path system-drives)))
 )
 
 (provide (all-defined-out))

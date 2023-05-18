@@ -7,40 +7,67 @@
 
 ;-----------------------Representacion-----------------------
 ;Se presenta el TDA System, el cual corresponde tal y como indica su nombre a una representacion
-;del system, el cual contiene la fecha, el nombre del sistema, los drives, el path y la papelera de reciclaje. Esta representacion
+;del system, el cual contiene la fecha, el nombre del sistema, los drives,los usuarios, el path y la papelera de reciclaje. Esta representacion
 ;esta dada por una lista con estos elementos los cuales se ven en el constructor demonimado system y set-system.
 
 ;-----------------------Constructor-----------------------
+;Descripcion: Funcion que crea un sistema.
 ;Dom: system-name (string)
 ;Rec: system (list)
-;Descripcion: Funcion que crea un sistema.
 ;Tipo de recursión: No empleada
 (define (system system-name)
   (list (get-current-date) system-name null null null null)
 )
 
+;Descripcion: Funcion que recopila y une los datos del sistema.
 ;Dom: system=name (string) X system-drives (list) X system-users (list) X system-path (list)
 ;Rec: system (list)
-;Descripcion: Funcion que recopila y une los datos del sistema.
 ;Tipo de recursión: No empleada
 (define (set-system system-name system-drives system-users system-path system-rb)
   (list (get-current-date) system-name system-drives system-users system-path system-rb)
 )
 
-;Dom: name-file (string) - type-file (string) - content-file (string) - hidden? (char or null) - only-read? (char or null)
-;Rec: file (list)
-;Descripcion: Funcion que crea un archivo.
+;-----------------------Selectores-----------------------
+;Dom: outdated-system (list)
+;Rec: system-name (string)
+;Descripcion: Funcion que obtiene el nombre del sistema.
 ;Tipo de recursión: No empleada
-(define (file name-file type-file content-file . args)
-    (cond [(null? args)
-            (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #f #f)]
-        [(equal? (length args) 1)
-            (if (equal? (car args) #\h)
-                (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #t #f)
-                (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #f #t))]
-        [else (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #t #t)]
-    )
+(define (get-system-name outd-system)
+    (list-ref outd-system 1)
 )
+
+;Dom: outdated-system (list)
+;Rec: system-drives (list)
+;Descripcion: Funcion que obtiene las unidades dentro del sistema.
+;Tipo de recursión: No empleada
+(define (get-system-drives outd-system)
+    (list-ref outd-system 2)
+)
+
+;Dom: outdated-system (list)
+;Rec: system-users (list)
+;Descripcion: Funcion que obtiene los usuarios dentro del sistema.
+;Tipo de recursión: No empleada
+(define (get-system-users outd-system)
+    (list-ref outd-system 3)
+)
+
+;Dom: outdated-system (list)
+;Rec: system-path (list)
+;Descripcion: Funcion que obtiene la ruta dentro del sistema.
+;Tipo de recursión: No empleada
+(define (get-system-path outd-system)
+    (list-ref outd-system 4)
+)
+
+;Dom: outdated-system (list)
+;Rec: system-recycle-bin (list)
+;Descripcion: Funcion que obtiene la papelera de reciclaje dentro del sistema.
+;Tipo de recursión: No empleada
+(define (get-system-rb outd-system)
+    (list-ref outd-system 5)
+)
+
 ;-----------------------Modificadores-----------------------
 ;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - d-letter (char) - d-name (string)  - d-capacity (string)
 ;Rec: updated-system (list)
@@ -146,16 +173,16 @@
 ;la ruta del sistema sin antes verificar que la unidad seleccionada exista.
 ;Tipo de recursión: No empleada
 (define switch-drive-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (d-letter)
-    (if (and (source-exists? d-letter s-drives) (someone-logged-in? s-users))
+    (if (source-exists? d-letter s-drives)
         (set-system s-name s-drives s-users (set-path-sd d-letter) s-rb)
         (set-system s-name s-drives s-users s-path s-rb)
     )
     ))
 )
 
-;Dom: outdated-system (list) - letter-drive (char)
-;Rec: updated-system (list)
 ;Descripcion: Funcion que cambia la unidad en la que se quiere trabajar.
+;Dom: outdated-system (list) X letter-drive (char)
+;Rec: updated-system (list)
 ;Tipo de recursión: No empleada
 (define switch-drive (lambda (outd-system) (lambda (d-letter)
     ((switch-drive-aux (get-system-name outd-system) (get-system-drives outd-system) 
@@ -181,7 +208,7 @@
     ))
 )
 
-;Dom: outdated-system (list) - directory-name (string)
+;Dom: outdated-system (list) X directory-name (string)
 ;Rec: updated-system
 ;Descripcion: Funcion que crea carpetas segun la ruta del sistema.
 ;Tipo de recursión: No empleada
@@ -226,22 +253,16 @@
 ;Tipo de recursión: No empleada
 (define cd-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (directory-name)
     (if (someone-logged-in? s-users)
-        (cond
-        [(string=? directory-name "..")
-            (set-system s-name s-drives s-users (set-path-return s-path) s-rb)
-        ]
-        [(string=? directory-name "/")
-            (set-system s-name s-drives s-users (set-path-root s-path) s-rb)
-        ]
-        [(string-is-path? directory-name)
-            (if (is-path-a-new-path? directory-name)
-                (set-system s-name s-drives s-users (set-path-new-path directory-name s-path s-drives) s-rb)
-                (set-system s-name s-drives s-users (set-path-add-path directory-name s-path s-drives) s-rb)
-            )
-        ]
-        [else
-            (set-system s-name s-drives s-users (set-path-add-directory directory-name s-path s-drives) s-rb)
-        ]
+        (cond [(string=? directory-name "..")
+                (set-system s-name s-drives s-users (set-path-return s-path) s-rb)]
+            [(string=? directory-name "/")
+                (set-system s-name s-drives s-users (set-path-root s-path) s-rb)]
+            [(string-is-path? directory-name)
+                (if (is-path-a-new-path? directory-name)
+                    (set-system s-name s-drives s-users (set-path-new-path directory-name s-path s-drives) s-rb)
+                    (set-system s-name s-drives s-users (set-path-add-path directory-name s-path s-drives) s-rb)
+                )]
+            [else (set-system s-name s-drives s-users (set-path-add-directory directory-name s-path s-drives) s-rb)]
         )
         (set-system s-name s-drives s-users s-path s-rb)
     )
@@ -257,31 +278,6 @@
              (get-system-users outd-system) (get-system-path outd-system)
              (get-system-rb outd-system))
              (string-downcase directory-name))
-    ))
-)
-
-;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - d-letter (char) - new-d-name (char)
-;Rec: updated-system (list)
-;Descripcion: Funcion auxiliar de format, actualiza la lista de unidades en el caso
-;de que exista un usuario logueado.
-;Tipo de recursión: No empleada
-(define format-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (d-letter new-d-name)
-    (if (and (someone-logged-in? s-users) (s-path-is-out-t-path? s-path (list d-letter)))
-        (set-system s-name (set-drives-format d-letter new-d-name s-drives) s-users s-path s-rb)
-        (set-system s-name s-drives s-users s-path s-rb)
-    )
-    ))
-)
-
-;Dom: outdated-system (list) - d-letter (char) - new-d-name (string)
-;Rec: updated-system (list)
-;Descripcion: Funcion que busca formatear una unidad dentro del sistema.
-;Tipo de recursión: No empleada
-(define format (lambda (outd-system) (lambda (d-letter new-d-name)
-    ((format-aux (get-system-name outd-system) (get-system-drives outd-system)
-                 (get-system-users outd-system) (get-system-path outd-system)
-                 (get-system-rb outd-system)) 
-                 (char-downcase d-letter) (string-downcase new-d-name))
     ))
 )
 
@@ -401,53 +397,263 @@
     ))
 )
 
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - fetched-source (list) - target-path (list)
+;Rec: updated-system (list)
+;Descripcion: Segunda funcion auxiliar de copy, se encarga de copiar el archivo o carpeta a la
+;ruta objetivo en el caso de que este y la ruta existan.
+;Tipo de recursión: No empleada
+(define copy-aux2 (lambda (s-name s-drives s-users s-path s-rb) (lambda (fetched-source target-path)
+    (if (someone-logged-in? s-users)
+        (set-system s-name (set-drives-rec fetched-source sd-copy s-drives target-path) s-users s-path s-rb)
+        (set-system s-name s-drives s-users s-path s-rb)
+    )
+    ))
+)
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list)
+;     - source (string) - target-path (list) - directory-from-s-path (list) - directory-from-t-path (list)
+;Rec: updated-system (list)
+;Descripcion: Primera funcion auxiliar de copy, se encarga de recopilar los archivos y carpetas
+;y renombrarlos en caso de ya existir, luego se los manda a la 2da funcion aux.
+;Tipo de recursión: No empleada
+(define copy-aux1 (lambda (s-name s-drives s-users s-path s-rb) 
+    (lambda (source target-path directory-from-s-path directory-from-t-path)
+        (if (source-exists? source directory-from-s-path)
+            (if (source-exists? source directory-from-t-path)
+                (if (is-a-file? source)
+                    ((copy-aux2 s-name s-drives s-users s-path s-rb)
+                                (get-and-ren-file source directory-from-s-path) target-path)
+                    ((copy-aux2 s-name s-drives s-users s-path s-rb)
+                                (get-and-ren-directory source directory-from-s-path) target-path)           
+                )
+                (if (is-a-file? source)
+                    ((copy-aux2 s-name s-drives s-users s-path s-rb)
+                                (get-file source directory-from-s-path) target-path)
+                    ((copy-aux2 s-name s-drives s-users s-path s-rb)
+                                (get-directory source directory-from-s-path) target-path)           
+                )
+            )
+            (set-system s-name s-drives s-users s-path s-rb)
+        )
+    ))
+)
+
+;Dom: outdated-system (list) - source (string) - target-path (string)
+;Rec: updated-system
+;Descripcion: Funcion que busca copiar un archivo o carpeta.
+;Tipo de recursión: No empleada
+(define copy (lambda (outd-system) (lambda (source t-path)
+    (if (path-exists? (new-string-path->list-path t-path) (get-system-drives outd-system))
+        ((copy-aux1 (get-system-name outd-system) (get-system-drives outd-system) 
+                    (get-system-users outd-system) (get-system-path outd-system)
+                    (get-system-rb outd-system))
+                    (string-downcase source) (new-string-path->list-path t-path)
+                    (get-last-directory-from-path (get-system-path outd-system) 
+                                                (get-system-drives outd-system))
+                    (get-last-directory-from-path (new-string-path->list-path t-path) 
+                                                (get-system-drives outd-system)))
+        (set-system (get-system-name outd-system) (get-system-drives outd-system) 
+                    (get-system-users outd-system) (get-system-path outd-system)
+                    (get-system-rb outd-system))
+    )
+    ))
+)
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list)
+;     - source (list) - source-name (string) t-path (list)
+;Rec: updated-system (list)
+;Descripcion: Segunda funcion auxiliar de move, se encarga de mover el archivo o carpeta
+;sin antes verificar que la ruta del sistema este fuera de la ruta objetivo (en caso de mover una carpeta)
+;Tipo de recursión: No empleada
+(define move-aux2 (lambda (s-name s-drives s-users s-path s-rb) (lambda (source source-name t-path)
+    (if (and (someone-logged-in? s-users) (s-path-is-out-t-path? s-path t-path))
+        (set-system s-name (set-drives-move source source-name t-path s-drives s-path) s-users s-path s-rb)
+        (set-system s-name s-drives s-users s-path s-rb)
+    )
+    ))
+)
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list)
+;     - source (list) - t-path (list) - directory-from-s-path (list) - directory-from-t-path (list)
+;Rec: updated-system (list)
+;Descripcion: Primera funcion auxiliar de move, se encarga de recopiar los archivos o carpetas
+;y cambiarle el nombre en caso de que ya exista, luego se los envia a la 2da fn aux.
+;Tipo de recursión: No empleada
+(define move-aux1 (lambda (s-name s-drives s-users s-path s-rb) 
+    (lambda (source target-path directory-from-s-path directory-from-t-path)
+        (if (source-exists? source directory-from-s-path)
+            (if (source-exists? source directory-from-t-path)
+                (if (is-a-file? source)
+                    ((move-aux2 s-name s-drives s-users s-path s-rb)
+                                (get-and-ren-file source directory-from-s-path) source target-path)
+                    ((move-aux2 s-name s-drives s-users s-path s-rb)
+                                (get-and-ren-directory source directory-from-s-path) source target-path)           
+                )
+                (if (is-a-file? source)
+                    ((move-aux2 s-name s-drives s-users s-path s-rb)
+                                (get-file source directory-from-s-path) source target-path)
+                    ((move-aux2 s-name s-drives s-users s-path s-rb)
+                                (get-directory source directory-from-s-path) source target-path)           
+                )
+            )
+            (set-system s-name s-drives s-users s-path s-rb)
+        )
+    ))
+)
+
+;Dom: outdated-system (list) - source (string) - t-path (string)
+;Rec: updated-system (list)
+;Descripcion: funcion que mueve un archivo o carpeta a otra parte de la lista de unidades.
+;Tipo de recursión: No empleada
+(define move (lambda (outd-system) (lambda (source t-path)
+    (if (path-exists? (new-string-path->list-path t-path) (get-system-drives outd-system))
+        ((move-aux1 (get-system-name outd-system) (get-system-drives outd-system) 
+                    (get-system-users outd-system) (get-system-path outd-system)
+                    (get-system-rb outd-system))
+                    (string-downcase source) (new-string-path->list-path t-path)
+                    (get-last-directory-from-path (get-system-path outd-system) 
+                                                (get-system-drives outd-system))
+                    (get-last-directory-from-path (new-string-path->list-path t-path) 
+                                                (get-system-drives outd-system)))
+        (set-system (get-system-name outd-system) (get-system-drives outd-system) 
+                    (get-system-users outd-system) (get-system-path outd-system)
+                    (get-system-rb outd-system))
+    )
+    ))
+)
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - source-name (string) - new-source-name (string)
+;Rec: updated-system (list)
+;Descripcion: Funcion auxilar de ren, se encarga de renombrar el archivo o carpeta indicado.
+;Tipo de recursión: No empleada
+(define ren-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (source-name new-source-name)
+    (if (someone-logged-in? s-users)
+        (set-system s-name (set-drives-rec (list source-name new-source-name) sd-ren s-drives s-path) 
+                            s-users s-path s-rb)         
+        (set-system s-name s-drives s-users s-path s-rb)    
+    )
+    ))
+)
+
+;Dom: outdated-system (list) - source-name (string) - new-source-name (string)
+;Rec: updated-string (list)
+;Descripcion: Funcion que renombra un archivo o carpeta.
+;Tipo de recursión: No empleada
+(define ren (lambda (outd-system) (lambda (source-name new-source-name)
+    ((ren-aux (get-system-name outd-system) (get-system-drives outd-system) 
+              (get-system-users outd-system) (get-system-path outd-system)
+              (get-system-rb outd-system))
+              (string-downcase source-name) (string-downcase new-source-name))
+    ))
+)
+
+;Dom: string-for-display (string) - t-directory-c (list) - n-a (int) -  n-c (int)
+;Rec: string-for-display (string)
+;Descripcion: Funcion auxiliar de dir, recopila la informacion de los archivos y carpetas
+;y las almacena dentro del string que se proyectara en un display.
+;Tipo de recursión: cola
+(define dir-aux (lambda (string-for-display t-directory-c n-a n-c)
+    (if (null? t-directory-c)
+        string-for-display
+        (if (string? (car t-directory-c))
+            (if (is-a-file? (car t-directory-c))
+                (if (not (hidden-file? (car t-directory-c) t-directory-c))
+                    (dir-aux (string-append string-for-display
+                                             "#ARCHIVO N" (number->string n-a) ":\n"
+                                             "\tNombre del archivo: " (list-ref t-directory-c 0) "\n"
+                                             "\tTipo de archivo: " (list-ref t-directory-c 0) "\n")
+                              (cddddr t-directory-c) (+ n-a 1) n-c)
+                    (dir-aux string-for-display (cddddr t-directory-c) n-a n-c)
+                )
+                (if (not (hidden-directory? (car t-directory-c) t-directory-c))
+                    (dir-aux (string-append string-for-display
+                                             "#CARPETA N" (number->string n-c) ":\n"
+                                             "\tNombre de la carpeta: " 
+                                             (list-ref t-directory-c 0) "\n")
+                              (cdddr t-directory-c) n-a (+ n-c 1))
+                    (dir-aux string-for-display (cdddr t-directory-c) n-a n-c)
+                )
+            )
+            (dir-aux string-for-display (cdr t-directory-c) n-a n-c)
+        )
+    )
+    )
+)
+
+;Dom: outd-system (list) - args (char)
+;Rec: string-for-display (string)
+;Descripcion: Funcion que muestra toda la informacion de los archivos y carpeta dentro de la carpeta actual.
+;Tipo de recursión: ninguna
+(define dir (lambda (outd-system . args)
+    (cond [(null? args)
+            (if (> (length (get-system-path outd-system)) 1)
+                (dir-aux (string-append "###### CARPETA " 
+                                        (string-upcase (list-ref (get-t-directory-from-s-path 
+                                                                (get-system-path outd-system) 
+                                                                (get-system-drives outd-system)) 0)) 
+                                        " ######\n") 
+                        (list-ref (get-t-directory-from-s-path (get-system-path outd-system) 
+                                                                (get-system-drives outd-system)) 1) 1 1)
+                (dir-aux (string-append "###### CARPETA " 
+                                        (string-upcase (list-ref (get-t-drive-from-s-path 
+                                                                (car (get-system-path outd-system))
+                                                                (get-system-drives outd-system)) 0)) 
+                                        " ######\n")
+                        (list-ref (get-t-drive-from-s-path (car (get-system-path outd-system)) 
+                                                            (get-system-drives outd-system)) 1) 1 1)
+            )]
+    )
+    )
+)
+
+
+;Dom: s-name (string) - s-drives (list) - s-users (list) - s-path (list) - s-rb (list) - d-letter (char) - new-d-name (char)
+;Rec: updated-system (list)
+;Descripcion: Funcion auxiliar de format, actualiza la lista de unidades en el caso
+;de que exista un usuario logueado.
+;Tipo de recursión: No empleada
+(define format-aux (lambda (s-name s-drives s-users s-path s-rb) (lambda (d-letter new-d-name)
+    (if (and (someone-logged-in? s-users) (s-path-is-out-t-path? s-path (list d-letter)))
+        (set-system s-name (set-drives-format d-letter new-d-name s-drives) s-users s-path s-rb)
+        (set-system s-name s-drives s-users s-path s-rb)
+    )
+    ))
+)
+
+;Dom: outdated-system (list) - d-letter (char) - new-d-name (string)
+;Rec: updated-system (list)
+;Descripcion: Funcion que busca formatear una unidad dentro del sistema.
+;Tipo de recursión: No empleada
+(define format (lambda (outd-system) (lambda (d-letter new-d-name)
+    ((format-aux (get-system-name outd-system) (get-system-drives outd-system)
+                 (get-system-users outd-system) (get-system-path outd-system)
+                 (get-system-rb outd-system)) 
+                 (char-downcase d-letter) (string-downcase new-d-name))
+    ))
+)
+
+;Dom: name-file (string) - type-file (string) - content-file (string) - hidden? (char or null) - only-read? (char or null)
+;Rec: file (list)
+;Descripcion: Funcion que crea un archivo.
+;Tipo de recursión: No empleada
+(define (file name-file type-file content-file . args)
+    (cond [(null? args)
+            (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #f #f)]
+        [(equal? (length args) 1)
+            (if (equal? (car args) #\h)
+                (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #t #f)
+                (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #f #t))]
+        [else (list (string-downcase name-file) (string-downcase type-file) (string-downcase content-file) #t #t)]
+    )
+)
+
 ;-----------------------Otras operaciones-----------------------
+;Descripcion: Funcion que permite ejecutar una funcion sobre el sistema.
 ;Dom: outdated-system (list) X function (function)
 ;Rec: updated-system (list)
-;Descripcion: Funcion que permite ejecutar una funcion sobre el sistema.
 ;Tipo de recursión: No empleada
 (define (run outd-system function)
     (curry function outd-system)
-)
-
-;Dom: outdated-system (list)
-;Rec: system-name (string)
-;Descripcion: Funcion que obtiene el nombre del sistema.
-;Tipo de recursión: No empleada
-(define (get-system-name outd-system)
-    (list-ref outd-system 1)
-)
-
-;Dom: outdated-system (list)
-;Rec: system-drives (list)
-;Descripcion: Funcion que obtiene las unidades dentro del sistema.
-;Tipo de recursión: No empleada
-(define (get-system-drives outd-system)
-    (list-ref outd-system 2)
-)
-
-;Dom: outdated-system (list)
-;Rec: system-users (list)
-;Descripcion: Funcion que obtiene los usuarios dentro del sistema.
-;Tipo de recursión: No empleada
-(define (get-system-users outd-system)
-    (list-ref outd-system 3)
-)
-
-;Dom: outdated-system (list)
-;Rec: system-path (list)
-;Descripcion: Funcion que obtiene la ruta dentro del sistema.
-;Tipo de recursión: No empleada
-(define (get-system-path outd-system)
-    (list-ref outd-system 4)
-)
-
-;Dom: outdated-system (list)
-;Rec: system-recycle-bin (list)
-;Descripcion: Funcion que obtiene la papelera de reciclaje dentro del sistema.
-;Tipo de recursión: No empleada
-(define (get-system-rb outd-system)
-    (list-ref outd-system 5)
 )
 
 (provide (all-defined-out))

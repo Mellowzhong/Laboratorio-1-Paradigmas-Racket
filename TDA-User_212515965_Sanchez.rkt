@@ -5,6 +5,23 @@
 ;del usuario, la cual contiene el nombre y el estado de "logeo". Esta representacion esta dada
 ;por una lista de esos elementos los cuales se modificaran dependiendo de lo que se le pida.
 
+;-----------------------Pertenencia-----------------------
+;Dom: username (string) - users-outdated-system (list)
+;Rec: boolean
+;Descripcion: Funcion busca si el nombre que se quiere seleccionar al nuevo usuario esta disponible.
+;Tipo de recursión: No aplicada
+(define (username-exists? username users-s)
+    (not (boolean? (member username users-s)))
+)
+
+;Dom: users-outdated-system (list)
+;Rec: boolean
+;Descripcion: Funcion que busca si existe un usuario logeado.
+;Tipo de recursión: No aplicada
+(define (someone-logged-in? users-outdated-system)
+    (not (boolean? (member #t users-outdated-system)))
+)
+
 ;-----------------------Modificadores-----------------------
 ;Dom: username (string) - users-outdated-system (list)
 ;Rec: users-system (list)
@@ -35,22 +52,6 @@
         (remove #t (reverse (member #t (reverse users-outdated-system))))
         (list #f)
         (remove #t (member #t users-outdated-system)))
-)
-;-----------------------Pertenencia-----------------------
-;Dom: username (string) - users-outdated-system (list)
-;Rec: boolean
-;Descripcion: Funcion busca si el nombre que se quiere seleccionar al nuevo usuario esta disponible.
-;Tipo de recursión: No aplicada
-(define (username-exists? username users-s)
-    (not (boolean? (member username users-s)))
-)
-
-;Dom: users-outdated-system (list)
-;Rec: boolean
-;Descripcion: Funcion que busca si existe un usuario logeado.
-;Tipo de recursión: No aplicada
-(define (someone-logged-in? users-outdated-system)
-    (not (boolean? (member #t users-outdated-system)))
 )
 
 ;-----------------------Otras operaciones-----------------------
