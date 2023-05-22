@@ -103,11 +103,11 @@
 ;add-drive 1/3
 (define S56 ((run S55 add-drive) #\c "juegos" 10000))
 ;add-drive 2/3
-(define S57 ((run S56 add-drive) #\d "juegos" 10000))
+(define S57 ((run S56 add-drive) #\D "juegos" 10000))
 ;add-drive 3/3
 (define S58 ((run S57 add-drive) #\e "juegos" 10000))
 ;switch-drive 1/3
-(define S59 ((run S58 switch-drive) #\E))
+(define S59 ((run S58 switch-drive) #\D))
 ;md 1/3
 (define S60 ((run S59 md) "carpetaA"))
 ;cd 1/3
@@ -121,9 +121,9 @@
 ;cd 2/3
 (define S65 ((run S64 cd) "CARPETAc"))
 ;add-file 2/3
-(define S66 ((run S65 add-file) (file "Nota2.txt" "txt" "gato naranjo")))
+(define S66 ((run S65 add-file) (file "Nota2.txt" "txt" "Hay un gato en la universidad")))
 ;add-file 3/3
-(define S67 ((run S66 add-file) (file "Nota3.docx" "txt" "hace frio")))
+(define S67 ((run S66 add-file) (file "Nota3.docx" "txt" "hace mucho frio")))
 ;cd 3/3
 (define S68 ((run S67 cd) "/"))
 ;cd 4/3
@@ -131,7 +131,7 @@
 ;cd 5/3
 (define S70 ((run S69 cd) "carpetaa/CARPETAB"))
 ;add-file 4/3
-(define S71 ((run S70 add-file) (file "nota4.txt" "txt" "ahora voy a eliminar los archivos de la carpetac")))
+(define S71 ((run S70 add-file) (file "nota4.txt" "txt" "ahora voy a eliminar los archivos de la carpeta c")))
 ;cd 6/3
 (define S72 ((run S71 cd) ".."))
 ;cd 7/3
@@ -141,13 +141,13 @@
 ;add-file 5/3
 (define S75 ((run S74 add-file) (file "nota5.txt" "txt" "ahora voy a crear otro usuario y desloguearme")))
 ;register 1/3
-(define S76 ((run S75 register) "elpepe"))
+(define S76 ((run S75 register) "Pedro"))
 ;login 1/3
-(define S77 ((run S76 login) "elpepe"))
+(define S77 ((run S76 login) "Pedro"))
 ;logout 1/3
 (define S78 (run S77 logout))
 ;login 2/3
-(define S79 ((run S78 login) "elpepe"))
+(define S79 ((run S78 login) "Pedro"))
 ;add-file 6/3
 (define S80 ((run S79 add-file) (file "nota6.txt" "txt" "ahora mandare este archivo a...")))
 ;move 1/3
@@ -191,15 +191,15 @@
 ;switch-drive 2/3
 (define S100 ((run S99 switch-drive) #\d))
 ;register 2/3
-(define S101 ((run S100 register) "AalSaa"))
+(define S101 ((run S100 register) "Mellow"))
 ;register 3/3
-(define S102 ((run S101 register) "Alonsans"))
+(define S102 ((run S101 register) "Zhong"))
 ;loguout 2/3
 (define S103 (run S102 logout))
 ;logout 3/3
 (define S104 (run S103 logout))
 ;login 3/3
-(define S105 ((run S104 login) "AalSaa"))
+(define S105 ((run S104 login) "Mellow"))
 ;format 1/3
 (define S106 ((run S105 format) #\c "NewSO"))
 ;format 2/3

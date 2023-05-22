@@ -118,18 +118,6 @@
     )
 )
 
-;Dom: path-system (list) - path-directory (list)
-;Rec: path-system (list)
-;Descripcion: Funcion auxiliar de set-path-add-path, actualiza la ruta del sistema
-;agregandole nuevas direcciones.
-;Tipo de recursión: cola
-(define (set-path-add-path-aux directory-path system-path)
-    (if (null? directory-path) 
-        system-path
-        (set-path-add-path-aux (cdr directory-path) (append system-path (list (car directory-path))))
-    )
-)
-
 ;Dom: directory-path (string) - system-path (list) - system-drives (list)
 ;Rec: system-path (list)
 ;Descripcion: Funcion que convierte el string en una ruta adherida a la ruta actual del sistema.
@@ -261,6 +249,17 @@
             (new-string-path->list-path-aux (cdr path) (append l-char (list (car path))) l-path)
         ]
         )
+    )
+)
+;Dom: path-system (list) - path-directory (list)
+;Rec: path-system (list)
+;Descripcion: Funcion auxiliar de set-path-add-path, actualiza la ruta del sistema
+;agregandole nuevas direcciones.
+;Tipo de recursión: cola
+(define (set-path-add-path-aux directory-path system-path)
+    (if (null? directory-path) 
+        system-path
+        (set-path-add-path-aux (cdr directory-path) (append system-path (list (car directory-path))))
     )
 )
 

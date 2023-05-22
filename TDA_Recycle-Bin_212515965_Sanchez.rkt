@@ -8,6 +8,37 @@
 ;esta dada por una serie de funciones las cuales tienen como objetivo mover archivos hacia la papelera de reciclaje.
 
 ;-----------------------Modificadores-----------------------
+
+;Dom: filename (string) - system-drives (list) - system-rb (list)
+;Rec: updated-system-rb
+;Descripcion: Funcion que agrega un archivo a la papelera de reclaje
+;Tipo de recursión: No empleada
+(define (move-file-to-rb filename system-drives system-path system-rb)
+    (move-file-to-rb-aux filename (get-last-directory-from-path system-path system-drives)
+                                  system-path system-rb)
+)
+
+;Dom: filename (string) - directory (list) - path-system (list) - recycle-bin-system (list)
+;Rec: updated-recycle-bin-system (list)
+;Descripcion: Funcion que mueve todos los archivos de una carpeta a la papelera de reciclaje.
+;Tipo de recursión: No empleada
+(define (move-all-files-to-rb filename system-drives system-path recycle-bin-system)
+    (move-all-files-to-rb-aux (get-last-directory-from-path system-path system-drives) 
+                               system-path recycle-bin-system)
+)
+
+;Dom: file-pattern (string) X directory (list) X path-system (list) X recycle-bin-system (list)
+;Rec: updated-recycle-bin-system (list)
+;Descripcion: Funcion que mueve todos los archivos de una carpeta que cumplen un patron a la
+;papelera de reciclaje.
+;Tipo de recursión: No empleada
+(define (move-file-by-pattern-to-rb file-pattern system-drives system-path system-rb)
+    (move-file-by-pattern-to-rb-aux (get-file-pattern-info file-pattern)
+                                    (get-last-directory-from-path system-path system-drives)
+                                    system-path system-rb)
+)
+
+;-----------------------Otras operaciones-----------------------
 ;Dom: filename (string) - directory (list) - path-system (list) - recycle-bin-system (list)
 ;Rec: updated-recycle-bin-system (list)
 ;Descripcion: Funcion auxiliar de move-file-to-rb, mueve un archivo a la papelera de reciclaje.
@@ -24,15 +55,6 @@
         )
         recycle-bin-system
     )
-)
-
-;Dom: filename (string) - system-drives (list) - system-rb (list)
-;Rec: updated-system-rb
-;Descripcion: Funcion que agrega un archivo a la papelera de reclaje
-;Tipo de recursión: No empleada
-(define (move-file-to-rb filename system-drives system-path system-rb)
-    (move-file-to-rb-aux filename (get-last-directory-from-path system-path system-drives)
-                                  system-path system-rb)
 )
 
 ;Dom: directory (list) - path-system (list) - recycle-bin-system (list)
@@ -57,15 +79,6 @@
         (move-all-files-to-rb-aux (cdr directory) path-system recycle-bin-system)
         )
     )
-)
-
-;Dom: filename (string) - directory (list) - path-system (list) - recycle-bin-system (list)
-;Rec: updated-recycle-bin-system (list)
-;Descripcion: Funcion que mueve todos los archivos de una carpeta a la papelera de reciclaje.
-;Tipo de recursión: No empleada
-(define (move-all-files-to-rb filename system-drives system-path recycle-bin-system)
-    (move-all-files-to-rb-aux (get-last-directory-from-path system-path system-drives) 
-                               system-path recycle-bin-system)
 )
 
 ;Dom: pattern-info (list) X directory (list) X path-system (list) X recycle-bin-system (list)
@@ -95,17 +108,6 @@
                                             recycle-bin-system)
         )
     )
-)
-
-;Dom: file-pattern (string) X directory (list) X path-system (list) X recycle-bin-system (list)
-;Rec: updated-recycle-bin-system (list)
-;Descripcion: Funcion que mueve todos los archivos de una carpeta que cumplen un patron a la
-;papelera de reciclaje.
-;Tipo de recursión: No empleada
-(define (move-file-by-pattern-to-rb file-pattern system-drives system-path system-rb)
-    (move-file-by-pattern-to-rb-aux (get-file-pattern-info file-pattern)
-                                    (get-last-directory-from-path system-path system-drives)
-                                    system-path system-rb)
 )
 
 ;Dom: directory-name (string) - act-directory (list) - path-system (list) - recycle-bin-system (list)
